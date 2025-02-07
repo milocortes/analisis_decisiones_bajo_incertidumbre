@@ -102,14 +102,17 @@ Necesitamos realizar una configuración previa para trabajar con Git. Como míni
 Podemos nuestra identidad en el archivo de configuración mediante el commando ```git config```:
 
 ```bash 
-git config user.name "Milo"
-git config user.email "hermilocg@tec.mx"
+git config  --global user.name "Milo"
+git config  --global user.email "hermilocg@tec.mx"
 ```
 
 Si decides no incluir tu identidad, deberás especificar tu identidad para cada ```git commit``` al agregar el argumento ```--author``` al final del comando:
 ```bash
 git commit -m "log message" --author="Milo <hermilocg@tec.mx>"
 ```
+
+Sólo necesitas hacer esto una vez si especificas la opción ```--global```, ya que Git siempre usará esta información para todo lo que hagas en ese sistema. Si quieres sobrescribir esta información con otro nombre o dirección de correo para proyectos específicos, puedes ejecutar el comando sin la opción ```--global``` cuando estés en ese proyecto.
+
 <!-- end_slide -->
 
 # Trabajando con un repositorio local
