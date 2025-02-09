@@ -4,6 +4,18 @@
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    #! format: off
+    quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
+        el
+    end
+    #! format: on
+end
+
 # ╔═╡ 3513786f-c1b3-4b7d-9d76-a65c44e6fe4b
 begin
 	# Load packages
@@ -12,6 +24,7 @@ begin
 	using DataFrames
 	using PlutoUI
 	using PlutoTeachingTools
+	using LaTeXStrings
 end
 
 # ╔═╡ 1b7bee54-cc0f-46f8-859a-5873db3a974a
@@ -56,7 +69,7 @@ md"""
 
 # ╔═╡ 8d85fc20-effa-447f-b2b5-a46e0bfc0b28
 md"""
-# Feedback Systems
+# Feedback Systems: Clasificación
 Los feedback systems pueden ser clasificados como:
 * Positive feedback systems.
 * Negative feedback systems.
@@ -66,217 +79,183 @@ Los feedback systems pueden ser clasificados como:
 md"""
 # Positive feedback systems
 
-* Positive feedback systems generan crecimiento.
+* Positive feedback systems generan crecimiento (autoreforzamiento).
 * Por ejemplo: Sistemas de crecimiento poblacional.
 * La población se multiplica para producir más población que aumenta la tasa de crecimiento a la que aumenta la población.
 
+$(PlutoUI.LocalResource("images/mod01_01.png", :width => 300))
 """
 
 # ╔═╡ 81dbcb20-7393-4528-91f6-12b5b65393eb
-begin
-	#polinomios_path = "images/mod01_01.png";
-	#RobustLocalResource(polinomios_path)
-end
-
-# ╔═╡ d83f780a-14c1-4aa9-af69-3ac72e33c29a
 md"""
-## Fisheries Simulation Model 
-In this notebook, we examine the workings of the Gordon-Schaefer Fisheries Model for a single species.
-
-Denoting $S(t)$ as the stock of fish population at time $t$, we can write the population growth function as:
+## Modelo básico de crecimiento poblacional
+Para describir el crecimiento de una población, utilizamos la ecuación diferencial:
 
 ```math
-\dfrac{\Delta S}{\Delta t} = r S(t) \Big(1 - \dfrac{S(t)}{K} \Big) 
+\dfrac{dP}{dt} = \alpha * P_t
+```
+
+donde $\alpha$ es la tasa de crecimiento de la población y $P_t$ es la población en el periodo $t$.
+"""
+
+# ╔═╡ f6af8638-b988-417d-a997-38d9a5a7c79f
+md"""
+Valor de $\alpha$: $(@bind p_mod01 Slider(0:0.01:0.3, default=0.1)) 
+"""
+
+# ╔═╡ 21117ce5-4cb2-43be-940a-8825fdd1176d
+begin
+
+	# ODE
+	function modelo_crecimiento_poblacional(du,u,p,t)
+	    α = p
+	    N = u[1]
+	    du[1] = α*N
+	end
+	
+	# Condiciones iniciales
+	N0 = 3.0
+	u0_mod01 = [N0]
+	init_t = 0.0
+	final_t = 10.0
+	tiempo = (init_t,final_t)
+	
+	prob1 = ODEProblem(modelo_crecimiento_poblacional,u0_mod01,tiempo,p_mod01)
+	sol = solve(prob1,Euler(),dt=0.1)
+
+	 plot(sol, title = "Modelo de crecimiento poblacional",xlabel = "Tiempo",ylabel = "Población (millones)", label ="Población a una tasa de crecimiento de $(p_mod01 * 100)% anual")
+end
+
+# ╔═╡ 1a02b2a7-971f-4153-9e7f-daa121db6c32
+md"""
+# Negative feedback systems
+* Negative feedback systems generan una trayectoria de balaceo-equilibrio o *goal-seeking*.
+"""
+
+# ╔═╡ 764fe402-6f02-4b12-aef2-e2682132ab2a
+md"""
+## Modelo de crecimiento restringido por capacidad de carga
+
+Sea $P(t)$ la población al momento $t$, podemos expresar la función de crecimiento poblaciónal con capacidad de carga de la siguiente manera:
+
+```math
+\dfrac{dP}{dt} = \alpha P(t) \Big(1 - \dfrac{P(t)}{K} \Big) 
 ```
 
 where
 
-$S(t)= \text{ stock size at time } t$
-$K = \text{ carrying capacity}$
-$r = \text{ intrinsic growth rate of the population}$
+$P(t)= \text{ población al momento } t$
+$K = \text{ capacidad de carga}$
+$\alpha = \text{ tasa de crecimiento de la población}$
+"""
+
+# ╔═╡ cf36d63e-dbe8-418e-bb04-43e97b4d404f
+md"""
+Valor de $\alpha$: $(@bind alpha_mod02 Slider(0:0.01:0.5, default=0.2))
+
+Valor de $K$: $(@bind k_mod02 Slider(2500:100:5000, default=3000))
 """
 
 # ╔═╡ 0834e8e5-8882-483a-935f-665e07af0702
-function gordon_schaefer_single(dS, u, h, p, t)
+function gordon_schaefer_single(dP, u, h, p, t)
     # Model parameters.
     r, K = p
 
     # Current state.
-    S = u[1]
+    P = u[1]
     # Evaluate differential equations
-    dS[1] = r*S * (1- S/K)
+    dP[1] = r*P * (1- P/K)
     return nothing
 end
 
 # ╔═╡ d77d1cd0-55d7-46b5-8397-a5fdfc90e2b5
 begin 
 	# Define initial-value problem.
-	p = (0.5, 3500)
+	p = (alpha_mod02, k_mod02)
 	u0 = [1.0]
 	tspan = (0.0, 50)
 	h(p, t; idxs::Int) = 100.0
 	prob_dde = DDEProblem(gordon_schaefer_single, u0, h, tspan, p);
 	sol_dde = solve(prob_dde; saveat=0.1)
-	plot(sol_dde)
+	plot(sol_dde, title = "Modelo de crecimiento poblacional con\n capacidad de carga",xlabel = "Tiempo",ylabel = "Población (millones)", label =L"$\alpha$=" * "$(alpha_mod02*100)%"*" y "* "k = $(k_mod02)")
 end
+
+# ╔═╡ 94afeb83-8202-4426-a099-bfcb6047e327
+md"""
+# Modos de comportamiento de los sistemas dinámicos 
+## Feedback loops 
+
+* La estructura básica de un feedback loop se presenta a continuación:
+
+$(PlutoUI.LocalResource("images/mod01_02.png", :width => 300))
+
+* Este es un circuito cerrado que consiste en una secuencia de eventos que comienza en una decisión que controla una acción (basado en el estado presente del sistema y la meta deseada) que modifica un **flujo**, el **stock** o **nivel** del sistema y la información acerca del stock del sistema, el cual representa nuevamente el punto de toma de decisiones para tomar medidas adicionales.
+* La información actual disponible sobre el nivel o stock del sistema y el objetivo es la base para la decisión actual que controla la acción. 
+* La acción cambia la condición del sistema.
+* La estructura de un feedback loop es la forma más simple de un feedback system.*
+
+"""
+
+# ╔═╡ 492cc15d-625d-47c9-85ae-cdaeca97d907
+md"""
+Toda la dinámica surge de las interacciones de dos tipos de feedback loops: positive feedback loops y negative feedback loops.
+
+$(PlutoUI.LocalResource("images/mod01_03.png", :width => 800))
+
+"""
+
+# ╔═╡ 065e3074-d8ae-4529-acfe-a6c818b91670
+md"""
+# Models and Simulation
+"""
+
+# ╔═╡ 6962ace8-1284-4c52-88bf-6812788cc353
+md"""
+# Pensamiento sistémico y modelación
+
+La metodología de pensamiento sistémico y modelación consiste esencialmente en :
+
+* Declaración del problema, 
+* Definición de los diagramas causales y de stock-flow,
+* Planeación de escenarios,
+* Implementación del modelo y el aprendizaje derivado de este proceso.
+
+"""
+
+# ╔═╡ 8d2d2fb3-a6a0-4987-8903-51e7cdf12ce3
+md"""
+# Pasos para la simulación de un modelo de dinámica de sistemas
+
+Los pasos para simular un modelo de dinámica de sistemas se resumen a continuación:
+
+* Identificar el problema y formular el modelo mental a partir de la descripción verbal (identificación/conceptualización del problema) y desarrollar una hipótesis dinámica para explicar el comportamiento en términos de diagramas causales y diagramas stock-flow del sistema.
+* Crear la estructura básica del diagrama causal a partir del modelo verbal.
+* Definir los diagramas de flujo de la dinámica del sistemas.
+* Trasladar los diagramas de flujo de la dinámica del sistema a un conjunto de ecuaciones diferenciales.
+* Estimar los parámetros de modelo.
+* Validar el modelo, analizar la sensibilidad y realizar el análisis de política.
+* Aplicar el modelo.
+
+"""
+
+# ╔═╡ 3c63b27b-af36-44f3-9193-bec96f53f9af
+
+
+# ╔═╡ 19c41b03-221f-4c90-a413-73d6eade5926
+
 
 # ╔═╡ a5c46d46-30e4-4f63-ad7f-202609d8bc21
 
 
-# ╔═╡ d6647899-d7a0-4a11-9e63-963ade635fab
-md"""
-## Delayed Hutchinson Model
-
-To take into account the regulatory influence of the population from
-a preceding time, $t -\tau$, Hutchinson proposed the following delayed
-logistic equation
-
-```math
-\dfrac{\Delta S}{\Delta t} = r S(t) \Big(1 - \dfrac{S(t-\tau)}{K} \Big) 
-```
-"""
-
-# ╔═╡ fe132199-813c-4c1c-964d-b728a46031a4
-function delay_hutchinson(dS, u, h, p, t)
-    # Model parameters.
-    r, K = p
-
-    # Current state.
-    S = u[1]
-    # Evaluate differential equations
-    dS[1] = r *S * (1-h(p, t - 1; idxs=1)/K)
-    return nothing
-end
-
-# ╔═╡ a01b597b-b485-42d7-8a4b-452ad3f3c980
-begin
-	# Define initial-value problem.
-	p_d = (1, 3500)
-	u0_d = [1500.0]
-	tspan_d = (0.0, 15.0)
-	h_d(p, t; idxs::Int) = 1.0
-	prob_dde_delay = DDEProblem(delay_hutchinson, u0_d, h_d, tspan_d, p_d);
-	sol_dde_delay = solve(prob_dde_delay; saveat=0.1)
-end
-
-
-# ╔═╡ a8b9a6bb-480d-4101-af4f-3e49f0ef08b6
-typeof(sol_dde_delay)
-
 # ╔═╡ 885d12d4-590c-4dae-8155-8df8e94404d0
 
-
-# ╔═╡ d42573c2-d90e-4556-ae5c-236c2f67783a
-md"""
-## Cap 14 Elements of Mathematical Ecology : Harvest model and optimal control theory
-An open-access fishery is an unregulated fishery in which fishermen are free to come and go as they please. One simple model for such a fishery (Schaefer, 1954) takes the form:
-
-```math
-\dfrac{\Delta S}{\Delta t} = r S \Big(1-\dfrac{S}{K} \Big) - q E S
-``` 
-```math
-\dfrac{\Delta E}{\Delta t} = k \Big( pq ES - cE \Big)
-```
-
-where $E$ is the level of fishing effort, $r$, is the intrinsic rate of growth of the stock, $K$ is the carrying capacity of the stock, $q$ is the catchability, $p$, is the price per fish, $c$ is the (opportunity) cost per unit effort, and $k$ is a proportionality constant.   
-"""
-
-# ╔═╡ 2818ba75-f1e0-4afa-9261-459a9d868406
-# Define Harvest fishery model (Lotka-Volterra) model.
-function harvest_model_lv(du, u, p, t)
-    # Model parameters.
-    r,K,q,p,c,k = p
-    # Current state.
-    S, E = u
-
-    # Evaluate differential equations.
-    du[1] = r*S*(1-S/K) - q*E*S # population (prey) dynamics
-    du[2] = k*(p*q*E*S - c*E)   # predator dynamics
-
-    return nothing
-end
-
-# ╔═╡ 7ee0c88a-1e1c-40c9-ba2d-c6033e50a764
-begin
-	# Define initial-value problem.
-	u0_hm = [100.0, 50.0]
-	p_hm = [0.5, # r : rate of growth of the population
-		 2000.0, # K : carrying capacity of the population
-		 0.004, # q : catchability
-		 1.0, # p : price per fish
-		 1.0, # c : is the (opportunity) cost per unit effort
-		 1.0  # k : is a proportionality constant
-	]
-	tspan_hm = (0.0, 50.0)
-	prob = ODEProblem(harvest_model_lv, u0_hm, tspan_hm, p_hm)
-	
-	# Plot simulation.
-	sol_prob = solve(prob, Tsit5())
-	plot(sol_prob, label=["S" "E"])
-	
-end
-
-# ╔═╡ 2a52a645-9d20-49ac-8ab9-cc93344bca2f
-md"""
-## Delayed Harvest model 
-To take into account the regulatory influence of the population from a preceding time, $t -\tau$, the dynamics of fishery takes the form:
-
-```math
-\dfrac{\Delta S}{\Delta t} = r S(t-\tau) \Big(1 - \dfrac{S}{K} \Big)  - q E S
-``` 
-```math
-\dfrac{\Delta E}{\Delta t} = k \Big( pq ES - cE \Big)
-```
-
-where $E$ is the level of fishing effort, $r$, is the intrinsic rate of growth of the stock, $K$ is the carrying capacity of the stock, $q$ is the catchability, $p$, is the price per fish, $c$ is the (opportunity) cost per unit effort, and $k$ is a proportionality constant.   
-"""
-
-# ╔═╡ 91f24559-a14e-4262-86fa-c03f70816c6f
-
-
-# ╔═╡ 6ef43c6a-6ea9-416a-87cf-6450020d8371
-begin
-	
-	# Define Delayed Harvest fishery model (Lotka-Volterra) model.
-	function delayed_harvest_model_lv(du, u, h, p, t)
-	    # Model parameters.
-	    r,K,q,p,c,k = p
-	    # Current state.
-	    S, E = u
-	
-	    # Evaluate differential equations.
-	    du[1] = r*h_dhm(p, t - 1; idxs=1)*(1-S/K) - q*E*S # population (prey) dynamics
-	    du[2] = k*(p*q*E*S - c*E)   # predator dynamics
-	
-		
-	    return nothing
-	end
-	# Define initial-value problem.
-	u0_dhm = [13.5, 1.2]
-	p_dhm = [0.6, # r : rate of growth of the population
-		 70.0, # K : carrying capacity of the population
-		 0.12, # q : catchability
-		 1.0, # p : price per fish
-		 2.0, # c : is the (opportunity) cost per unit effort
-		 2.0  # k : is a proportionality constant
-	]
-	tspan_dhm = (0.0, 4.4)
-	
-	h_dhm(p_dhm, t; idxs::Int) = 15.0
-	
-	prob_dhm = DDEProblem(delayed_harvest_model_lv, u0_dhm, h_dhm, tspan_dhm, p_dhm);
-
-	#sol_delayed_hm = solve(prob_delayed_hm; saveat=0.1)
-	#plot(sol_delayed_hm)
-	sol_dhm = solve(prob_dhm; saveat=0.1)
-	plot(sol_dhm, label=["S" "E"])
-end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
+LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
@@ -284,6 +263,7 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 [compat]
 DataFrames = "~1.7.0"
 DifferentialEquations = "~7.15.0"
+LaTeXStrings = "~1.4.0"
 PlutoTeachingTools = "~0.3.1"
 PlutoUI = "~0.7.23"
 StatsPlots = "~0.15.7"
@@ -295,7 +275,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "a7f5273bbfef44197f94ec30b60f100497cb98d1"
+project_hash = "3d07b454299682fff39c97a6b5836b7e2d13df47"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "e1ce448a0d7f88168ffe2eeac4549c32d45a42d1"
@@ -3183,22 +3163,23 @@ version = "1.4.1+2"
 # ╟─0960526b-3eee-4bb3-aaff-57f083b2af4b
 # ╟─349b79e1-0af2-40f7-9db8-622a93ccb51b
 # ╟─8d85fc20-effa-447f-b2b5-a46e0bfc0b28
-# ╠═d4fc0c88-e043-487c-9d60-8a054c2acb8a
-# ╠═81dbcb20-7393-4528-91f6-12b5b65393eb
-# ╟─d83f780a-14c1-4aa9-af69-3ac72e33c29a
-# ╠═0834e8e5-8882-483a-935f-665e07af0702
-# ╠═d77d1cd0-55d7-46b5-8397-a5fdfc90e2b5
+# ╟─d4fc0c88-e043-487c-9d60-8a054c2acb8a
+# ╟─81dbcb20-7393-4528-91f6-12b5b65393eb
+# ╟─f6af8638-b988-417d-a997-38d9a5a7c79f
+# ╟─21117ce5-4cb2-43be-940a-8825fdd1176d
+# ╟─1a02b2a7-971f-4153-9e7f-daa121db6c32
+# ╟─764fe402-6f02-4b12-aef2-e2682132ab2a
+# ╟─cf36d63e-dbe8-418e-bb04-43e97b4d404f
+# ╟─0834e8e5-8882-483a-935f-665e07af0702
+# ╟─d77d1cd0-55d7-46b5-8397-a5fdfc90e2b5
+# ╟─94afeb83-8202-4426-a099-bfcb6047e327
+# ╟─492cc15d-625d-47c9-85ae-cdaeca97d907
+# ╟─065e3074-d8ae-4529-acfe-a6c818b91670
+# ╟─6962ace8-1284-4c52-88bf-6812788cc353
+# ╟─8d2d2fb3-a6a0-4987-8903-51e7cdf12ce3
+# ╠═3c63b27b-af36-44f3-9193-bec96f53f9af
+# ╠═19c41b03-221f-4c90-a413-73d6eade5926
 # ╠═a5c46d46-30e4-4f63-ad7f-202609d8bc21
-# ╟─d6647899-d7a0-4a11-9e63-963ade635fab
-# ╠═fe132199-813c-4c1c-964d-b728a46031a4
-# ╠═a01b597b-b485-42d7-8a4b-452ad3f3c980
-# ╠═a8b9a6bb-480d-4101-af4f-3e49f0ef08b6
 # ╠═885d12d4-590c-4dae-8155-8df8e94404d0
-# ╟─d42573c2-d90e-4556-ae5c-236c2f67783a
-# ╠═2818ba75-f1e0-4afa-9261-459a9d868406
-# ╠═7ee0c88a-1e1c-40c9-ba2d-c6033e50a764
-# ╟─2a52a645-9d20-49ac-8ab9-cc93344bca2f
-# ╠═91f24559-a14e-4262-86fa-c03f70816c6f
-# ╠═6ef43c6a-6ea9-416a-87cf-6450020d8371
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
