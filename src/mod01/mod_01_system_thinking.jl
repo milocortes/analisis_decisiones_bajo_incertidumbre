@@ -4,19 +4,7 @@
 using Markdown
 using InteractiveUtils
 
-# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
-macro bind(def, element)
-    #! format: off
-    quote
-        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
-        local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
-        el
-    end
-    #! format: on
-end
-
-# ╔═╡ 3513786f-c1b3-4b7d-9d76-a65c44e6fe4b
+# ╔═╡ 009ec955-ae51-44d3-8fa6-63579b2a0aff
 begin
 	# Load packages
 	using DifferentialEquations
@@ -27,218 +15,88 @@ begin
 	using LaTeXStrings
 end
 
-# ╔═╡ 1b7bee54-cc0f-46f8-859a-5873db3a974a
+# ╔═╡ 3a6bf6e4-a598-49bd-87d5-804ac8392fca
 begin	
 	nb_link_prefix = string(PlutoRunner.notebook_id[]) # for making urls to notebook
     pkg_cell_link = "#" * (string(PlutoRunner.currently_running_cell_id[])) # for making urls to this cell
 	TableOfContents()   # from PlutoUI
 end 
 
-# ╔═╡ 0eb55ffd-006e-424c-850d-081911dbcec7
+# ╔═╡ bf574c88-e724-11ef-08c4-e101397b7939
 md"""
-# Conceptos de Sistemas y Dinámica de Sistemas
+# System Thinging: System Dynamics
 """
 
-# ╔═╡ eefa0f48-fe1d-4ba8-8881-c4e52a2d383a
+# ╔═╡ c84b0e90-6fc0-4d50-8b15-3a3507c051c1
 md"""
-# Open and Feedback Systems
-* ¿Qué es un sistema? Un grupo de partes que operan juntas para un propósito común.
-* Un sistema puede incluir componentes físicos, económicos, sociales, ecológicos, tecnológicos y políticos.
-* Por ejemplo, los sistemas de producción agrícola en un contexto de cambio climático. En el sistema agrícola interactúan factores físicos, biológicos, componentes sociales, tecnológicos, ambientales, económicos y políticos, etc.
-* Los sistemas pueden ser clasificados como **Open systems** y **Feedback systems**
-
+* El pensamiento sistémico es un método para estudiar el comportamiento dinámico de un sistema complejo considerando el enfoque de sistemas, i.e. considerando el sistema completo en lugar de pensarlo como aislado.
+* Dinámica de sistemas es una herramienta o campo de conocimiento para el entendimiento del cambio y complejidad en el tiempo de un sistema dinámico.
 """
 
-# ╔═╡ 0960526b-3eee-4bb3-aaff-57f083b2af4b
+# ╔═╡ 73c6ce21-ffcb-45b3-9901-9d52470f1f28
 md"""
-# Open Systems
+# Metodología del pensamiento sistémico
 
-En Open systems, las salidas del modelo responden a los insumos de modelo, pero las salidas del modelo no afectan las entradas del modelo. Además, las acciones pasadas no afectan las acciones futuras. En estos sistemas, el problema es percibido, se toman medidas, pero el resultado no influye en la acción.
+Aprendemos del problema a partir de la modelación y simulación del sistema.
 
+En general, se pueden resumir en 6 pasos la construcción de un modelo de dinámica de sistemas:
+
+* Identificación del problema.
+* Desarrollo de una hipótesis dinámica que explique la causa del problema.
+* Desarrollo de una estructura básica del diagrama causal.
+* Incrementar el diagrama causal al obtener más información.
+* Convertir el diagrama causal a un digrama de flujo de la dinámica de sistema.
+* Trasladar el digrama de flujo de la dinámica del sistema a un sistema de ecuaciones.
+
+$(warning_box(md"Es posible trasladar el digrama de flujo a algún software como STELLA o VENSIM para ejecutar el modelo. En el curso se prioriza la traducción de modelo a ecuaciones."))
 """
 
-# ╔═╡ 349b79e1-0af2-40f7-9db8-622a93ccb51b
+# ╔═╡ ffa2faee-1527-43ad-af1c-3a6ba2f1e501
 md"""
-# Feedback Systems
-
-* Los feedback system son sistemas cerrados, donde las entradas del modelo con modificadas por las salidas del modelo.
-* Los feedback system tiene una estructura de circuito cerrado que recupera el resultados de la acción pasada para controlar la acción futura.
-* En un sistema cerrado, se percibe el problema, se toman medidas y el resultado influye en la acción futura.
-* Por lo tanto, la característica distintiva de un sistema cerrado es la retroalimentación de información, decisión y acción que conecta la salidas con la entradas del sistema.
+## Identificación de problema
+* ¿Cuáles son los límites y los objetivos específicos a resolver?
+* Los límites del sistema deben considerar la parte de todo el sistema que incluye todos los variables importantes y relevantes para abordar el problema así como el propósito del análisis y diseño de políticas.
+* El alcance del estudio debe establecerse claramente para identificar las causas del problema para una comprensión clara del problema y las políticas para resolverlo a corto y largo plazo.
 """
 
-# ╔═╡ 8d85fc20-effa-447f-b2b5-a46e0bfc0b28
+# ╔═╡ 60017327-f229-4dfa-b526-a7059b80daa9
 md"""
-# Feedback Systems: Clasificación
-Los feedback systems pueden ser clasificados como:
-* Positive feedback systems.
-* Negative feedback systems.
-"""
-
-# ╔═╡ d4fc0c88-e043-487c-9d60-8a054c2acb8a
-md"""
-# Positive feedback systems
-
-* Positive feedback systems generan crecimiento (autoreforzamiento).
-* Por ejemplo: Sistemas de crecimiento poblacional.
-* La población se multiplica para producir más población que aumenta la tasa de crecimiento a la que aumenta la población.
-
-$(PlutoUI.LocalResource("images/conceptos_basicos/mod01_01.png", :width => 300))
-"""
-
-# ╔═╡ 81dbcb20-7393-4528-91f6-12b5b65393eb
-md"""
-## Modelo básico de crecimiento poblacional
-Para describir el crecimiento de una población, utilizamos la ecuación diferencial:
-
-```math
-\dfrac{dP}{dt} = \alpha * P_t
-```
-
-donde $\alpha$ es la tasa de crecimiento de la población y $P_t$ es la población en el periodo $t$.
-"""
-
-# ╔═╡ f6af8638-b988-417d-a997-38d9a5a7c79f
-md"""
-Valor de $\alpha$: $(@bind p_mod01 Slider(0:0.01:0.3, default=0.1)) 
-"""
-
-# ╔═╡ 21117ce5-4cb2-43be-940a-8825fdd1176d
-begin
-
-	# ODE
-	function modelo_crecimiento_poblacional(du,u,p,t)
-	    α = p
-	    N = u[1]
-	    du[1] = α*N
-	end
-	
-	# Condiciones iniciales
-	N0 = 3.0
-	u0_mod01 = [N0]
-	init_t = 0.0
-	final_t = 10.0
-	tiempo = (init_t,final_t)
-	
-	prob1 = ODEProblem(modelo_crecimiento_poblacional,u0_mod01,tiempo,p_mod01)
-	sol = solve(prob1,Euler(),dt=0.1)
-
-	 plot(sol, title = "Modelo de crecimiento poblacional",xlabel = "Tiempo",ylabel = "Población (millones)", label ="Población a una tasa de crecimiento de $(p_mod01 * 100)% anual")
-end
-
-# ╔═╡ 1a02b2a7-971f-4153-9e7f-daa121db6c32
-md"""
-# Negative feedback systems
-* Negative feedback systems generan una trayectoria de balaceo-equilibrio o *goal-seeking*.
-"""
-
-# ╔═╡ 764fe402-6f02-4b12-aef2-e2682132ab2a
-md"""
-## Modelo de crecimiento restringido por capacidad de carga
-
-Sea $P(t)$ la población al momento $t$, podemos expresar la función de crecimiento poblaciónal con capacidad de carga de la siguiente manera:
-
-```math
-\dfrac{dP}{dt} = \alpha P(t) \Big(1 - \dfrac{P(t)}{K} \Big) 
-```
-
-where
-
-$P(t)= \text{ población al momento } t$
-$K = \text{ capacidad de carga}$
-$\alpha = \text{ tasa de crecimiento de la población}$
-"""
-
-# ╔═╡ cf36d63e-dbe8-418e-bb04-43e97b4d404f
-md"""
-Valor de $\alpha$: $(@bind alpha_mod02 Slider(0:0.01:0.5, default=0.2))
-
-Valor de $K$: $(@bind k_mod02 Slider(2500:100:5000, default=3000))
-"""
-
-# ╔═╡ 0834e8e5-8882-483a-935f-665e07af0702
-function gordon_schaefer_single(dP, u, h, p, t)
-    # Model parameters.
-    r, K = p
-
-    # Current state.
-    P = u[1]
-    # Evaluate differential equations
-    dP[1] = r*P * (1- P/K)
-    return nothing
-end
-
-# ╔═╡ d77d1cd0-55d7-46b5-8397-a5fdfc90e2b5
-begin 
-	# Define initial-value problem.
-	p = (alpha_mod02, k_mod02)
-	u0 = [1.0]
-	tspan = (0.0, 50)
-	h(p, t; idxs::Int) = 100.0
-	prob_dde = DDEProblem(gordon_schaefer_single, u0, h, tspan, p);
-	sol_dde = solve(prob_dde; saveat=0.1)
-	plot(sol_dde, title = "Modelo de crecimiento poblacional con\n capacidad de carga",xlabel = "Tiempo",ylabel = "Población (millones)", label =L"$\alpha$=" * "$(alpha_mod02*100)%"*" y "* "k = $(k_mod02)")
-end
-
-# ╔═╡ 94afeb83-8202-4426-a099-bfcb6047e327
-md"""
-# Modos de comportamiento de los sistemas dinámicos 
-## Feedback loops 
-
-* La estructura básica de un feedback loop se presenta a continuación:
-
-$(PlutoUI.LocalResource("images/conceptos_basicos/mod01_02.png", :width => 300))
-
-* Este es un circuito cerrado que consiste en una secuencia de eventos que comienza en una decisión que controla una acción (basado en el estado presente del sistema y la meta deseada) que modifica un **flujo**, el **stock** o **nivel** del sistema y la información acerca del stock del sistema, el cual representa nuevamente el punto de toma de decisiones para tomar medidas adicionales.
-* La información actual disponible sobre el nivel o stock del sistema y el objetivo es la base para la decisión actual que controla la acción. 
-* La acción cambia la condición del sistema.
-* La estructura de un feedback loop es la forma más simple de un feedback system.*
+* Para reconocer el problema, se debe preparar una descripción detallada del problema basada en informes y estudios disponibles, opiniones de expertos y comportamiento pasado y actual del problema así como identificar las variables importantes que generan el comportamiento dinámico observado del sistema.
+* Se deben llevar a cabo debates con todas las partes interesadas, como debates de grupos focales, para justificar sus opiniones sobre los problemas existentes, sus puntos de vista sobre los datos recopilados y también sus puntos de vista sobre la solución de los problemas.
+* **Construir un laboratorio de ideas**.
 
 """
 
-# ╔═╡ 492cc15d-625d-47c9-85ae-cdaeca97d907
+# ╔═╡ 30cb56c3-49f4-4a36-8f2b-4599f012308a
 md"""
-Toda la dinámica surge de las interacciones de dos tipos de feedback loops: positive feedback loops y negative feedback loops.
+* La descripción verbal es la forma más sencilla de comunicarse con otros sobre el sistema. 
+* Cuanto más detallada sea la descripción, más fácil resultará modelar el sistema.
+* La descripción verbal es en la práctica un modelo cualitativo del sistema.
+"""
 
-$(PlutoUI.LocalResource("images/conceptos_basicos/mod01_03.png", :width => 800))
+# ╔═╡ aff99c06-5774-484e-8d51-46097e78da8e
+md"""
+### Ejemplo : Dinámica de Vivienda en la Zona Metropolitana de Monterrey: 20240. Una prospectiva participatoria.
+
+Problema : **Crisis de vivienda asequible en la ciudad de Monterrey**. 
+
+Para entender el problema se creó un laboratorio de ideas y toma de decisiones en el que participaron representantes de gobierno, desarrolladores inmobiliarios, organizaciones civiles y expertos en planeación urbana y políticas públicas.
+
+Los grupos de trabajo coincidieron que la crisis de vivienda es causa de una expansión urbana descontrolada que ocurre de manera horizontal y no vertical; también, por falta de financiamiento accesible para vivienda en zonas conectadas y a problemas de movilidad y transporte.
+
+$(PlutoUI.LocalResource("images/system_thinking/mod01_01.png", :width => 600))
 
 """
 
-# ╔═╡ 065e3074-d8ae-4529-acfe-a6c818b91670
+# ╔═╡ addc0195-ce96-4890-a256-e1b8f73eaac1
 md"""
-# Models and Simulation
+## Hipótesis Dinámica
 """
 
-# ╔═╡ 6962ace8-1284-4c52-88bf-6812788cc353
-md"""
-# Pensamiento sistémico y modelación
+# ╔═╡ 1e4405ed-f14b-4d27-9839-d247784ead2f
 
-La metodología de pensamiento sistémico y modelación consiste esencialmente en :
 
-* Declaración del problema, 
-* Definición de los diagramas causales y de stock-flow,
-* Planeación de escenarios,
-* Implementación del modelo y el aprendizaje derivado de este proceso.
-
-"""
-
-# ╔═╡ 8d2d2fb3-a6a0-4987-8903-51e7cdf12ce3
-md"""
-# Pasos para la simulación de un modelo de dinámica de sistemas
-
-Los pasos para simular un modelo de dinámica de sistemas se resumen a continuación:
-
-* Identificar el problema y formular el modelo mental a partir de la descripción verbal (identificación/conceptualización del problema) y desarrollar una hipótesis dinámica para explicar el comportamiento en términos de diagramas causales y diagramas stock-flow del sistema.
-* Crear la estructura básica del diagrama causal a partir del modelo verbal.
-* Definir los diagramas de flujo de la dinámica del sistemas.
-* Trasladar los diagramas de flujo de la dinámica del sistema a un conjunto de ecuaciones diferenciales.
-* Estimar los parámetros de modelo.
-* Validar el modelo, analizar la sensibilidad y realizar el análisis de política.
-* Aplicar el modelo.
-
-"""
-
-# ╔═╡ 885d12d4-590c-4dae-8155-8df8e94404d0
+# ╔═╡ 7c5e6310-bfb8-4563-9229-026e1751a2ac
 
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -256,7 +114,7 @@ DataFrames = "~1.7.0"
 DifferentialEquations = "~7.15.0"
 LaTeXStrings = "~1.4.0"
 PlutoTeachingTools = "~0.3.1"
-PlutoUI = "~0.7.23"
+PlutoUI = "~0.7.59"
 StatsPlots = "~0.15.7"
 """
 
@@ -266,7 +124,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.3"
 manifest_format = "2.0"
-project_hash = "3d07b454299682fff39c97a6b5836b7e2d13df47"
+project_hash = "69099c49234933fbb77e4ca577b42b7e03c04ebc"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "e1ce448a0d7f88168ffe2eeac4549c32d45a42d1"
@@ -565,19 +423,15 @@ version = "3.28.0"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
-git-tree-sha1 = "c7acce7a7e1078a20a285211dd73cd3941a871d6"
+git-tree-sha1 = "b10d0b65641d57b8b4d5e234446582de5047050d"
 uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
-version = "0.12.0"
-weakdeps = ["StyledStrings"]
-
-    [deps.ColorTypes.extensions]
-    StyledStringsExt = "StyledStrings"
+version = "0.11.5"
 
 [[deps.ColorVectorSpace]]
 deps = ["ColorTypes", "FixedPointNumbers", "LinearAlgebra", "Requires", "Statistics", "TensorCore"]
-git-tree-sha1 = "8b3b6f87ce8f65a2b4f857528fd8d70086cd72b1"
+git-tree-sha1 = "a1f44953f2382ebb937d60dafbe2deea4bd23249"
 uuid = "c3611d14-8923-5661-9e6a-0046d554d3a4"
-version = "0.11.0"
+version = "0.10.0"
 weakdeps = ["SpecialFunctions"]
 
     [deps.ColorVectorSpace.extensions]
@@ -1182,9 +1036,9 @@ version = "0.3.27"
 
 [[deps.Hyperscript]]
 deps = ["Test"]
-git-tree-sha1 = "8d511d5b81240fc8e6802386302675bdf47737b9"
+git-tree-sha1 = "179267cfa5e712760cd43dcae385d7ea90cc25a4"
 uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
-version = "0.0.4"
+version = "0.0.5"
 
 [[deps.HypertextLiteral]]
 deps = ["Tricks"]
@@ -1578,6 +1432,11 @@ deps = ["JuliaInterpreter"]
 git-tree-sha1 = "688d6d9e098109051ae33d126fcfc88c4ce4a021"
 uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
 version = "3.1.0"
+
+[[deps.MIMEs]]
+git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
+uuid = "6c6e2e6c-3030-632d-7369-2d6c69616d65"
+version = "0.1.4"
 
 [[deps.MKL_jll]]
 deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl", "oneTBB_jll"]
@@ -2135,10 +1994,10 @@ uuid = "661c6b06-c737-4d37-b85c-46df65de6f69"
 version = "0.3.1"
 
 [[deps.PlutoUI]]
-deps = ["AbstractPlutoDingetjes", "Base64", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
-git-tree-sha1 = "5152abbdab6488d5eec6a01029ca6697dff4ec8f"
+deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
+git-tree-sha1 = "ab55ee1510ad2af0ff674dbcced5e94921f867a9"
 uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.23"
+version = "0.7.59"
 
 [[deps.PoissonRandom]]
 deps = ["Random"]
@@ -3147,27 +3006,17 @@ version = "1.4.1+2"
 """
 
 # ╔═╡ Cell order:
-# ╟─3513786f-c1b3-4b7d-9d76-a65c44e6fe4b
-# ╟─1b7bee54-cc0f-46f8-859a-5873db3a974a
-# ╟─0eb55ffd-006e-424c-850d-081911dbcec7
-# ╟─eefa0f48-fe1d-4ba8-8881-c4e52a2d383a
-# ╟─0960526b-3eee-4bb3-aaff-57f083b2af4b
-# ╟─349b79e1-0af2-40f7-9db8-622a93ccb51b
-# ╟─8d85fc20-effa-447f-b2b5-a46e0bfc0b28
-# ╟─d4fc0c88-e043-487c-9d60-8a054c2acb8a
-# ╟─81dbcb20-7393-4528-91f6-12b5b65393eb
-# ╟─f6af8638-b988-417d-a997-38d9a5a7c79f
-# ╟─21117ce5-4cb2-43be-940a-8825fdd1176d
-# ╟─1a02b2a7-971f-4153-9e7f-daa121db6c32
-# ╟─764fe402-6f02-4b12-aef2-e2682132ab2a
-# ╟─cf36d63e-dbe8-418e-bb04-43e97b4d404f
-# ╟─0834e8e5-8882-483a-935f-665e07af0702
-# ╟─d77d1cd0-55d7-46b5-8397-a5fdfc90e2b5
-# ╟─94afeb83-8202-4426-a099-bfcb6047e327
-# ╟─492cc15d-625d-47c9-85ae-cdaeca97d907
-# ╟─065e3074-d8ae-4529-acfe-a6c818b91670
-# ╟─6962ace8-1284-4c52-88bf-6812788cc353
-# ╟─8d2d2fb3-a6a0-4987-8903-51e7cdf12ce3
-# ╠═885d12d4-590c-4dae-8155-8df8e94404d0
+# ╟─009ec955-ae51-44d3-8fa6-63579b2a0aff
+# ╟─3a6bf6e4-a598-49bd-87d5-804ac8392fca
+# ╟─bf574c88-e724-11ef-08c4-e101397b7939
+# ╟─c84b0e90-6fc0-4d50-8b15-3a3507c051c1
+# ╟─73c6ce21-ffcb-45b3-9901-9d52470f1f28
+# ╟─ffa2faee-1527-43ad-af1c-3a6ba2f1e501
+# ╟─60017327-f229-4dfa-b526-a7059b80daa9
+# ╟─30cb56c3-49f4-4a36-8f2b-4599f012308a
+# ╟─aff99c06-5774-484e-8d51-46097e78da8e
+# ╟─addc0195-ce96-4890-a256-e1b8f73eaac1
+# ╠═1e4405ed-f14b-4d27-9839-d247784ead2f
+# ╠═7c5e6310-bfb8-4563-9229-026e1751a2ac
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
