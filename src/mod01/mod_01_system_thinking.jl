@@ -91,13 +91,88 @@ $(PlutoUI.LocalResource("images/system_thinking/mod01_01.png", :width => 600))
 # ╔═╡ addc0195-ce96-4890-a256-e1b8f73eaac1
 md"""
 ## Hipótesis Dinámica
+* El objetivo de la hipótesis dinámica es desarrollar una explicación endógena del comportamiento del problema, esto es, las interacciones de las variables dentro del sistema que "causan" o "generan" el comportamiento de sistema.
+
+* Es la definición de los feedback loops críticos que explican el comportamiento dinámico del sistema.
+
+* La hipótesis dinámica se sistematiza con los diagramas causales y los diagramas stock-flow. 
+
+* Es necesario contrastar la validez de la hipótesis dinámica al simular el modelo y contrastar sus resultados contra los datos observados. 
+
+
 """
 
 # ╔═╡ 1e4405ed-f14b-4d27-9839-d247784ead2f
+md"""
+## Diagrama Causal
+* El siguiente paso consiste en buscar las relaciones claves entre las variables así como desarrollar los feedback loops. *¿Proceso de selección de variables en econometría?*
+* Estas relaciones y feedbacks se representan en la forma de un diagrama causal. *¿Directed Acyclic Graph?*.
+* El siguiente diagrama muestra un diagrama causal de un modelo de irrigación:
 
+$(PlutoUI.LocalResource("images/system_thinking/causal_diagram.png", :width => 700))
+
+* En este modelo, las principales variables son:
+  * El área de riego.
+  * La tasa de incremento del área de riego.
+  * La tasa de área de riego descartada o tasa de abandono.
+* Hay dos negative feedback loops, B1 y B2:
+  * B1 : La tasa de incremento del área de riego disminuye en la medida que el área de riego se incrementa y el aumento del área de irrigación incrementa el riego.
+  * B2 : La tasa de abandono del área de riego se incrementa con el incremento del área de riego lo que eventualmente genera la disminución del área de riego.
+
+* Ambos negative feedback loops representan la estructura de retroalimentación del sistema y causa o genera el comportamiento dinámico de sistema.
+
+* Se recomienda seguir los siguientes pasos para desarrollar un diagrama causal:
+  * Definir el problema y los objetivos.
+  * Identificar los elementos más importantes de sistema.
+  * Definir las relaciones causa-efecto.
+  * Identificar los loops de balanceo y reforzamiento.
+"""
 
 # ╔═╡ 7c5e6310-bfb8-4563-9229-026e1751a2ac
+md"""
+## Diagrama Stock-Flow
 
+* El diagrama stock-flow (acervo-flujo) define la estructura física subyacente del sistema en términos de flujos y acervos.
+* Usualmente, el diagrama stock-flow es desarrollado después de construir el diagrama causal, pero no necesariamente.
+* Los stocks representan el estado del sistema.
+* Los flujos se modifican por decisiones basadas en el estado del sistema.
+* Los stocks sólo pueden ser modificados mediante los flujos.
+* El diagrama stock-flow (o sistema de ecuaciones diferenciales) representa la estructura de retroalimentación del sistema.
+* La siguiente figura representa el diagrama de stock-flow del modelo de irrigación:
+
+$(PlutoUI.LocalResource("images/system_thinking/stock_flow_diagram.png", :width => 500))
+
+* Son tres las principales variables:
+  * El área de riego (Variable de Estado-Acervo-Stock).
+  * La tasa de incremento del área de riego (Variable de Flujo).
+  * La tasa de abandono del área de riego (Variable  de Flujo).
+
+* El área de riego tiene como unidad la cantidad (por ejemplo, m2).
+* Las tasas de incremento y de abandono tienen como unidad la cantidad por unidad de tiempo (m2/t).
+
+* Los pasos para desarrollar el sistema stock-flow son los siguientes:
+  * Definir el problema y objetivos.
+  * Identificar las variables más importantes del sistema.
+  * Identificar las variables que representan los acervos.
+  * Identificar las variables que los flujos (i.e. las que modifican el estado de las variables de estado o acervos).
+  * Asegurarse de mantener el balance entre los flujos de entrada al stock y salida del stock.
+"""
+
+# ╔═╡ 404e003d-398e-4ffd-b791-25bdb9d1e2cf
+md"""
+## Estimación de Parámetros
+
+La estimación de parámetros puede ser calculada, en general, por los siguientes métodos:
+
+  * Estimación a partir de datos desagregados (encuestas).
+  * Estimación a partir de las ecuaciones del modelo usando datos al nivel de agregación de las variables del modelo.
+  * Estimación a partir del conocimiento de expertos en el tema.
+"""
+
+# ╔═╡ 6539f323-6cd6-4b47-bcb9-fad926cdfce0
+md"""
+## Validación del modelo, análisis de sensibilidad y análisis de políticas.
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -3016,7 +3091,9 @@ version = "1.4.1+2"
 # ╟─30cb56c3-49f4-4a36-8f2b-4599f012308a
 # ╟─aff99c06-5774-484e-8d51-46097e78da8e
 # ╟─addc0195-ce96-4890-a256-e1b8f73eaac1
-# ╠═1e4405ed-f14b-4d27-9839-d247784ead2f
-# ╠═7c5e6310-bfb8-4563-9229-026e1751a2ac
+# ╟─1e4405ed-f14b-4d27-9839-d247784ead2f
+# ╟─7c5e6310-bfb8-4563-9229-026e1751a2ac
+# ╟─404e003d-398e-4ffd-b791-25bdb9d1e2cf
+# ╟─6539f323-6cd6-4b47-bcb9-fad926cdfce0
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
