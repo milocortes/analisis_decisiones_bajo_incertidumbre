@@ -4,7 +4,7 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ ca9d9270-0822-11f0-1207-753d43a70de9
+# ╔═╡ 8c78a8ee-0846-11f0-16a5-315a587a172f
 begin
 	# Load packages
 	using DifferentialEquations
@@ -15,233 +15,184 @@ begin
 	using LaTeXStrings
 	using ModelingToolkit
 	using ModelingToolkit: t_nounits as t, D_nounits as D
+	using Interpolations
 end
 
-# ╔═╡ 05b34f53-e0ed-43a8-9c5e-442756544a40
+# ╔═╡ f8db44ed-9deb-446d-b000-a3d9fc4910e4
 begin	
 	nb_link_prefix = string(PlutoRunner.notebook_id[]) # for making urls to notebook
     pkg_cell_link = "#" * (string(PlutoRunner.currently_running_cell_id[])) # for making urls to this cell
 	TableOfContents()   # from PlutoUI
 end 
 
-# ╔═╡ def84429-9ec6-4627-88c6-e101fb03d99f
+# ╔═╡ 608ed793-d380-4258-95ac-d5b376bfb020
 md"""
-# Modelo de Crecimiento Económico
+# Modeling Constraints—A Non-renewable Stock
 
-El siguiente Diagrama de Flujo y Acervo representa un modelo de crecimiento económico en el que hay dos feedback loop : uno de reforzamiento y otro de balanceo.
+Elaboraremos un sistema con dos stocks donde el crecimiento de un stock depende del nivel del segundo stock, el cual es no renovable. El modelo explora cómo el crecimiento de los pozos petroleros está en última instancia limitado por la disponibilidad de petróleo.
 
-$(PlutoUI.LocalResource("images/crecimiento_economico/crecimiento_economico_stock_flow.png", :width => 900))
+El modelo muestra una fase inicial de crecimiento, en la medida que el recurso es abundante, seguido por por una fuerte disminución a medida que el recurso se consume y se agota.
 
-El positive feedback loop está representado en la siguiente tabla:
+El modelo está basado en Meadows (2008) y se enfoca en un sistema que genera ingresos mediante la extracción de un recurso no renovable.
+
+## Digrama de Flujo y Acervo
+
+El Diagrama de Flujo y Acervo del modelo es el siguiente:
+
+$(PlutoUI.LocalResource("images/non_renewable/non_renewable.png", :width => 900))
+
+El sistema presenta un reinforcing loop que genera crecimiento y varios loops de balanceo o estabilización que restringen el crecimiento. 
+
+El modelo captura la dinámica de crecimiento y declive de una empresa que descubre un nuevo yacimiento petrolífero donde las reservas de petróleo podrían potencialmente durar hasta 200 años. 
+
+Las características clave del modelo son:
+
+* El stock de capital (esto es, los pozos petroleros) proporciona la capacidad de extraer recursos. Las inversiones son necesarias en el stock de capital dado que se degrada con el tiempo y debe ser reemplazado. Inicialmente la tasa de inversión es determinada por la meta de crecimiento, pero se ve afectada a medida que el recurso se agota, lo que limita el crecimiento. 
+* El stock del recurso es no renovable. Esto se observa en el diagrama dado que sólo tiene un flujo de salida, dado que este stock sólo puede ser consumido. La extracción del recurso está determinado por la cantidad disponible de capital. Sin embargo, las tasas de extracción son impactadas por la cantidad disponible de recursos. A medida que el nivel de recursos disminuye, la cantidad de recursos extraídos por unidad de capital disminuye. A medida que el recurso petrolero se diluye, hay menos presión natural para forzarlo a salir a la superficie y, por lo tanto, se requieren medidas más costosas y técnicamente sofisticadas para una extracción exitosa (Meadows, 2008).
+
 
 """
 
-# ╔═╡ b7378146-0d56-4c9a-bb67-77116663e10d
+# ╔═╡ 9d56f33b-729a-4544-9a35-a890f555c70b
 md"""
+
+El positive feedback loop (R1) del crecimiento del capital se describe en la siguiente tabla
+
 ||||||
 | :--------: | :---: | :---: | :---: | :---: |
-| $\uparrow$ | Machines | $\rightarrow$ | Economic output | $\uparrow$|
-| $\uparrow$ | Economic output | $\rightarrow$ | Investment | $\uparrow$|
-| $\uparrow$ | Investment | $\rightarrow$ | Machines | $\uparrow$|
+| $\uparrow$ | Capital | $\rightarrow$ | Desired investment | $\uparrow$|
+| $\uparrow$ | Desired investment | $\rightarrow$ | Investment | $\uparrow$|
+| $\uparrow$ | Investment | $\rightarrow$ | Capital | $\uparrow$|
 """
 
-# ╔═╡ 4e3015a7-d29c-42d8-b266-caaf1eb5cb9b
+# ╔═╡ 73d87ae7-72c9-489a-968e-addd7ca91992
 md"""
-Por su parte, el negative feedback loop del modelo está definido en la siguiente tabla:
+
+El primer negative-balancing feedback loop (B1) se describe en la siguiente tabla
 
 ||||||
 | :--------: | :---: | :---: | :---: | :---: |
-| $\uparrow$ | Machines | $\rightarrow$ | Discards | $\uparrow$|
-| $\uparrow$ | Discards | $\rightarrow$ | Machines | $\downarrow$|
+| $\uparrow$ | Capital | $\rightarrow$ | Depreciation | $\uparrow$|
+| $\uparrow$ | Depreciation | $\rightarrow$ | Capital | $\downarrow$|
+"""
+
+# ╔═╡ 77446b4b-c6bf-4b02-a696-547e4ac23feb
+md"""
+
+El segundo negative-balancing feedback loop (B2) se describe en la siguiente tabla
+
+||||||
+| :--------: | :---: | :---: | :---: | :---: |
+| $\uparrow$ | Capital | $\rightarrow$ | Capital Costs | $\uparrow$|
+| $\uparrow$ | Capital Costs | $\rightarrow$ | Profit | $\downarrow$|
+| $\downarrow$ | Profit | $\rightarrow$ | Capital funds | $\downarrow$|
+| $\downarrow$ | Capital funds | $\rightarrow$ | Maximum investment | $\downarrow$|
+| $\downarrow$ | Maximum investment | $\rightarrow$ | Investment | $\downarrow$|
+| $\downarrow$ | Investment | $\rightarrow$ | Capital | $\downarrow$|
 
 """
 
-# ╔═╡ 23e0bd69-16df-413a-8234-de1cbb325a90
+# ╔═╡ 7f39babb-082c-4fac-8ae3-55b8ba59ba4e
 md"""
-Ejecutemos el modelo utilizando los siguientes valores de los parámetros del modelo:
 
-* El stock inicial de máquinas es igual a 100.
+Los dos últimos negative-balancing feedback loop (B3 y B4) describen el impacto del crecimiento potencial del capital. Un mayor capital conlleva una mayor extracción, lo que agota el recurso. Con un recurso más bajo, la eficiencia de la extracción disminuye, lo que reduce aún más la tasa de extracción. Esto conlleva una reducción de ingresos y ganancias, lo que impacta negativamente en los fondos de capital. La reducción de la inversión de capital conlleva una reducción del capital.
 
-Del diagrama de flujo sabemos que el flujo de entrada es igual al producto de reinvestment fraction y de economic output:
-
-$\text{Investment} = \text{Economic Output} \times \text{Reinvestment Fraction}$
-
-Por su parte, el flujo de salida es igual a la medida de depreciación que reduce el stock de máquinas en una fracción constante por unidad de tiempo. 
-
-$\text{Discards} = \text{Machines} \times \text{Depreciation Fraction}$
-
-Donde:
-
-$\text{Reinvestment Fraction} = 0.20$
-$\text{Depreciation Fraction} = 0.10$
-
-La variable intermedia **Economic Output** podemos pensarla como una función de producción que usa factores de la producción trabajo ( parámetro Labour) y capital (variable de estado Machines) y que presenta rendimientos decrecientes, dado que la tasa de aumento de la productividad disminuye a medida que se añaden nuevas máquinas. Podemos capturar este comportamiento al usar una función cóncava donde la pendiente es decreciente. 
-
-$\text{Economic Output} = \text{Labour} \times \sqrt{\text{Machines}}$
-
-donde
-
-$\text{Labour} = 100$
-
-Ejecutemos el modelo para el periodo de tiempo (0,100) con pasos de 0.25.
+||||||
+| :--------: | :---: | :---: | :---: | :---: |
+| $\uparrow$ | Capital | $\rightarrow$ | Extraction | $\uparrow$|
+| $\uparrow$ | Extraction | $\rightarrow$ | Resource | $\downarrow$|
+| $\downarrow$ | Resource | $\rightarrow$ | Extraction efﬁciency Per unit capital | $\downarrow$|
+| $\downarrow$ | Extraction efﬁciency Per unit capital | $\rightarrow$ | Extraction | $\downarrow$|
+| $\downarrow$ | Extraction | $\rightarrow$ | Total revenue | $\downarrow$|
+| $\downarrow$ | Total revenue | $\rightarrow$ | Proﬁts | $\downarrow$|
+| $\downarrow$ | Proﬁts | $\rightarrow$ | Capital funds | $\downarrow$|
+| $\downarrow$ | Capital funds | $\rightarrow$ | Maximum investment | $\downarrow$|
+| $\downarrow$ | Maximum investment | $\rightarrow$ | Investment | $\downarrow$|
+| $\downarrow$ | Investment | $\rightarrow$ | Capital | $\downarrow$|
 """
 
-# ╔═╡ 925a2e83-3876-4dc2-9f3d-30c95c094bbe
-begin
-	## Las ecuaciones del modelo se definen en una función de Julia
-	function CrecimientoEconomico(dM, u,  p, t)
-	    # Parámetros del modelo.
-	    reinvestment_frac, dep_frac, labour  = p
-	
-	    # Estado actual del sistema.
-	    M = u[1]
-
-		# Calculamos las variables intermedias del modelo
-		economic_output = labour*sqrt(M)
-		investment = economic_output*reinvestment_frac
-		discards = M*dep_frac
-		
-		# Evaluamos la ecuación diferencial
-	    dM[1] = investment - discards
-
-	return nothing
-
-	end
-end
-
-# ╔═╡ 54af977a-ed44-4a52-bd4c-e3ba516a5d2e
-begin
-	# Condiciones iniciales
-	
-	## Valor inicial del stock
-	M0 = 100.0
-	## Incorporamos el valor inicial del stock a un vector 
-	u0 = [M0]
-
-	## Valor de los parámetros del modelo
-	reinvestment_frac = 0.2 
-	dep_frac = 0.1
-	labour = 100.0
-	
-	## Guardamos los parámetros en un vector de parámetros
-	parametros = [reinvestment_frac, dep_frac, labour]
-	
-	## Definimos el periodo de tiempo de la simulación
-	init_t = 0.0
-	final_t = 100.0
-	tiempo = (init_t,final_t)
-
-	## Definimos tamaño de paso
-	h = 0.25
-	
-	## Resolvemos el modelo con Runge-Kutta 4
-	prob_crec_ec = ODEProblem(CrecimientoEconomico, u0, tiempo, parametros)
-	sol_crec_ec = solve(prob_crec_ec,RK4(),dt=h,adaptive=false)
-end
-
-# ╔═╡ bd99e0ae-1624-47cf-bf48-a0aa84c244fa
+# ╔═╡ 59787a3a-720d-4de7-974f-d1f92f66ec5b
 md"""
-El valor en el tiempo de la variables de estado se muestra en la siguiente figura
+## Ecuaciones del modelo
+
+### Stocks
+
+Las variables de stock tienen valores iniciales de:
+
+* Stock de capital es igual a 5.0
+* Stock del recurso no renovable es igual a 1000.0
+
+
 """
 
-# ╔═╡ 11db9d40-b176-4da6-ae50-2e99064b8da8
-begin
-	plot(sol_crec_ec, title = "Stock de Maquinaria",xlabel = "Tiempo",ylabel = "Stock", label = "Stock")
-end
-
-# ╔═╡ ec06a71a-87a4-4a9b-b59a-085e08cdcb1a
-question_box(md"""¿Qué ocurriría si la fracción de depreciación (```dep_frac```) es igual a cero?
-
-Simula el modelo con 
-
-```
-dep_frac = 0.0
-```
-
-¿Qué feedback loop desaparece?
-
-""")
-
-# ╔═╡ 642c44bf-4c0e-45d4-96ae-e0943a36e941
+# ╔═╡ 19e2aade-e27a-4363-8a5d-578eccddd34b
 md"""
-## Análisis de equilibrio
+### Ecuaciones intermedias
 
-El enfoque de Dinámica de Sistemas nos permite realizar un análisis de equilibrio para este modelo. Un principio básico de Dinámica de Sistemas es que, bajo condiciones de equilibrio de cualquier stock, la suma de todos los flujos de entrada será igual a la suma de todos los flujos de salida. 
+#### Stock de Capital
 
-La relación entre flujos de entrada y flujos de salida está representada en la siguiente ecuación
+El stock de capital crece como la diferencia entre las inversiones y la depreciación. La tasa de depreciación es igual al 5%. El monto de depreciación de capital es igual a :
 
 ``
-R \times L \times \sqrt{M^*} = M^* \times D
+\text{Depreciation} = \text{Capital} \times \text{Depreciation Rate}
 ``
 
-Despejando para $M^*$ obtenemos la cantidad de máquinas de equilibrio
-
 ``
-M^* = \Bigg(\dfrac{RL}{D} \Bigg)^2
+\text{Depreciation Rate} = 0.05
 ``
 
-El actual equilibrio puede ser calculado con valores $R=0.2$, $L=100$ y $D=0.1$, el cual es igual a $M^*=40000$, el cual es el mismo resultado que el valor de estado estacionario calculado en el modelo de simulación.
+La inversión deseada representa la tasa de inversión objetivo del capital para estimular el crecimiento. Esta inversión es modelada como una proporción fija del stock del capital donde la meta inicial es de 7%, y como esta es mayor que la tasa de depreciación del 5%, el stock de capital debería crecer inicialmente a una tasa exponencial.
+
+``
+\text{Desired Investment} = \text{Desired Growth Fraction} \times \text{Capital} 
+``
+
+``
+\text{Desired Growth Fraction} = 0.07
+``
 """
 
-# ╔═╡ c9cd83e8-7842-464b-946e-27cbfbdd2e14
+# ╔═╡ d393d384-3acb-4d42-aa93-c80e754813a4
 md"""
-## Modelemos con [ModelingToolkit.jl](https://docs.sciml.ai/ModelingToolkit/stable/)
+
+#### Stock del recurso no renovable
+
+En última instancia el recurso no renovable limitará este crecimiento. La tasa de extración del recurso depende de la cantidad disponible de capital, el cual es multiplicado por la eficiencia de extracción por unidad de capital
+
+``
+\text{Extraction} = \text{Capital} \times \text{Extraction Efficiency Per Unit Capital}
+``
+
+Extraction Efficiency Per Unit Capital representa una función que captura la relación no lineal entre el nivel de recurso y la eficiencia de extracción:
 """
 
-# ╔═╡ dbad2fee-b7ad-43aa-8647-057d1c46815b
+# ╔═╡ 05a087d4-c997-4401-ae8d-06041b24cf36
 begin
-	@mtkmodel FOL begin
-    @parameters begin
-        # Parámetros del modelo y sus valores iniciales
-		reinvestment_frac = 0.2 
-		dep_frac = 0.1
-		labour = 100.0
-		
-    end
-    @variables begin
-		# Variables de estado y sus valor inicial
-        M(t) = 100.0 
+	efficiency_data = [0.0, 0.25, 0.45, 0.63, 0.75, 0.85, 0.92, 0.96, 0.98, 0.99, 1.0]
 
-		# Variables intermedias que queremos guardar sus salidas
-        economic_output(t)
-		investment(t)
-		discards(t)
-		
-    end
-    @equations begin
-		economic_output ~ labour*sqrt(M)
-		investment ~ economic_output*reinvestment_frac
-		discards ~ M*dep_frac
+	resource_data = [0.0, 100.0, 200.0, 300.0, 400.0, 500.0, 600.0, 700.0, 800.0, 900.0, 1000.0]
 
-		D(M) ~ investment - discards
-    end
-	end
-
-	@mtkbuild fol = FOL()
+	plot(resource_data, efficiency_data, title = "Relación entre recurso y eficiencia",xlabel = "Resource",ylabel = "Extraction Efficiency Per Unit Capital", label = "Interpolado")
+	plot!(resource_data, efficiency_data, seriestype=:scatter, label = "Observado")
 end
 
-# ╔═╡ aee0bd17-1dbc-404c-aa15-caf263709bc1
+# ╔═╡ 1da06ddd-5feb-4eac-9efa-8c5b349800b2
+md"""
+La relación lineal entre el recurso y la eficiencia de extracción está definida para 11 valores de recurso. Necesitamos usar una interpolación para poder conocer el valor de eficiencia para cualquier valor de recurso. 
+"""
+
+# ╔═╡ 8821f4fe-41b4-4d87-a139-ac3ff8582b25
 begin
-	prob_mtk = ODEProblem(fol, [], tiempo, [])
-	sol_mtk = solve(prob_mtk,RK4(),dt=h,adaptive=false)
+	## Creamos una interpolación lineal para obtener el valor de eficiencia para cualquier valor del recurso
+	interp_efficiency = linear_interpolation(resource_data, efficiency_data)
 end
-
-# ╔═╡ c4936f68-20aa-4d5f-bc19-b9ace50c3f19
-begin
-	plot(sol_mtk, title = "Modelo de crecimiento económico (ModellingToolkit)",xlabel = "Tiempo",ylabel = "Stock", label = "Máquinas")
-end
-
-# ╔═╡ e07dd353-ab83-44c4-b203-2827ffef2670
-plot(sol_mtk, idxs = [fol.investment], title = "Investment", xlabel = "Tiempo")
-
-# ╔═╡ a869b9ed-ad7c-43fa-ac76-fa1e4ea89f74
-plot(sol_mtk, idxs = [fol.discards], title = "Discards", xlabel = "Tiempo")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
+Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 ModelingToolkit = "961ee093-0014-501f-94e3-6117800e7a78"
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
@@ -251,10 +202,11 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 [compat]
 DataFrames = "~1.7.0"
 DifferentialEquations = "~7.15.0"
+Interpolations = "~0.15.1"
 LaTeXStrings = "~1.4.0"
 ModelingToolkit = "~9.62.0"
 PlutoTeachingTools = "~0.3.1"
-PlutoUI = "~0.7.59"
+PlutoUI = "~0.7.61"
 StatsPlots = "~0.15.7"
 """
 
@@ -264,7 +216,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "bc06b702eee01d4d60266dda481ee3a1a0b72e76"
+project_hash = "747f70c67ea244672816e2edc3f37000a4a40fb2"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "e2478490447631aedba0823d4d7a80b2cc8cdb32"
@@ -543,9 +495,9 @@ version = "3.4.3"
 
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "009060c9a6168704143100f36ab08f06c2af4642"
+git-tree-sha1 = "2ac646d71d0d24b44f3f8c84da8c9f4d70fb67df"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
-version = "1.18.2+1"
+version = "1.18.4+0"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra"]
@@ -1382,10 +1334,10 @@ uuid = "82899510-4779-5014-852e-03e436cf321d"
 version = "1.0.0"
 
 [[deps.JLFzf]]
-deps = ["Pipe", "REPL", "Random", "fzf_jll"]
-git-tree-sha1 = "71b48d857e86bf7a1838c4736545699974ce79a2"
+deps = ["REPL", "Random", "fzf_jll"]
+git-tree-sha1 = "1d4015b1eb6dc3be7e6c400fbd8042fe825a6bac"
 uuid = "1019f520-868f-41f5-a6de-eb00f4b6a39c"
-version = "0.1.9"
+version = "0.1.10"
 
 [[deps.JLLWrappers]]
 deps = ["Artifacts", "Preferences"]
@@ -2237,16 +2189,11 @@ git-tree-sha1 = "8489905bcdbcfac64d1daa51ca07c0d8f0283821"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
 version = "2.8.1"
 
-[[deps.Pipe]]
-git-tree-sha1 = "6842804e7867b115ca9de748a0cf6b364523c16d"
-uuid = "b98c9c47-44ae-5843-9183-064241ee97a0"
-version = "1.3.0"
-
 [[deps.Pixman_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "LLVMOpenMP_jll", "Libdl"]
-git-tree-sha1 = "35621f10a7531bc8fa58f74610b1bfb70a3cfc6b"
+git-tree-sha1 = "db76b1ecd5e9715f3d043cec13b2ec93ce015d53"
 uuid = "30392449-352a-5448-841d-b1acce4e97dc"
-version = "0.43.4+0"
+version = "0.44.2+0"
 
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "Random", "SHA", "TOML", "Tar", "UUIDs", "p7zip_jll"]
@@ -2271,9 +2218,9 @@ version = "1.4.3"
 
 [[deps.Plots]]
 deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "JLFzf", "JSON", "LaTeXStrings", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "PrecompileTools", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "RelocatableFolders", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "TOML", "UUIDs", "UnicodeFun", "UnitfulLatexify", "Unzip"]
-git-tree-sha1 = "564b477ae5fbfb3e23e63fc337d5f4e65e039ca4"
+git-tree-sha1 = "24be21541580495368c35a6ccef1454e7b5015be"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-version = "1.40.10"
+version = "1.40.11"
 
     [deps.Plots.extensions]
     FileIOExt = "FileIO"
@@ -3435,23 +3382,18 @@ version = "1.4.1+2"
 """
 
 # ╔═╡ Cell order:
-# ╠═ca9d9270-0822-11f0-1207-753d43a70de9
-# ╟─05b34f53-e0ed-43a8-9c5e-442756544a40
-# ╟─def84429-9ec6-4627-88c6-e101fb03d99f
-# ╟─b7378146-0d56-4c9a-bb67-77116663e10d
-# ╟─4e3015a7-d29c-42d8-b266-caaf1eb5cb9b
-# ╟─23e0bd69-16df-413a-8234-de1cbb325a90
-# ╠═925a2e83-3876-4dc2-9f3d-30c95c094bbe
-# ╠═54af977a-ed44-4a52-bd4c-e3ba516a5d2e
-# ╟─bd99e0ae-1624-47cf-bf48-a0aa84c244fa
-# ╠═11db9d40-b176-4da6-ae50-2e99064b8da8
-# ╟─ec06a71a-87a4-4a9b-b59a-085e08cdcb1a
-# ╟─642c44bf-4c0e-45d4-96ae-e0943a36e941
-# ╟─c9cd83e8-7842-464b-946e-27cbfbdd2e14
-# ╠═dbad2fee-b7ad-43aa-8647-057d1c46815b
-# ╠═aee0bd17-1dbc-404c-aa15-caf263709bc1
-# ╠═c4936f68-20aa-4d5f-bc19-b9ace50c3f19
-# ╠═e07dd353-ab83-44c4-b203-2827ffef2670
-# ╠═a869b9ed-ad7c-43fa-ac76-fa1e4ea89f74
+# ╠═8c78a8ee-0846-11f0-16a5-315a587a172f
+# ╟─f8db44ed-9deb-446d-b000-a3d9fc4910e4
+# ╟─608ed793-d380-4258-95ac-d5b376bfb020
+# ╟─9d56f33b-729a-4544-9a35-a890f555c70b
+# ╟─73d87ae7-72c9-489a-968e-addd7ca91992
+# ╟─77446b4b-c6bf-4b02-a696-547e4ac23feb
+# ╟─7f39babb-082c-4fac-8ae3-55b8ba59ba4e
+# ╟─59787a3a-720d-4de7-974f-d1f92f66ec5b
+# ╟─19e2aade-e27a-4363-8a5d-578eccddd34b
+# ╟─d393d384-3acb-4d42-aa93-c80e754813a4
+# ╠═05a087d4-c997-4401-ae8d-06041b24cf36
+# ╠═1da06ddd-5feb-4eac-9efa-8c5b349800b2
+# ╠═8821f4fe-41b4-4d87-a139-ac3ff8582b25
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
