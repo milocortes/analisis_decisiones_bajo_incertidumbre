@@ -167,14 +167,7 @@ Extraction Efficiency Per Unit Capital representa una función que captura la re
 """
 
 # ╔═╡ 05a087d4-c997-4401-ae8d-06041b24cf36
-begin
-	efficiency_data = [0.0, 0.25, 0.45, 0.63, 0.75, 0.85, 0.92, 0.96, 0.98, 0.99, 1.0]
 
-	resource_data = [0.0, 100.0, 200.0, 300.0, 400.0, 500.0, 600.0, 700.0, 800.0, 900.0, 1000.0]
-
-	plot(resource_data, efficiency_data, title = "Relación entre recurso y eficiencia",xlabel = "Resource",ylabel = "Extraction Efficiency Per Unit Capital", label = "Interpolado")
-	plot!(resource_data, efficiency_data, seriestype=:scatter, label = "Observado")
-end
 
 # ╔═╡ 1da06ddd-5feb-4eac-9efa-8c5b349800b2
 md"""
@@ -182,10 +175,7 @@ La relación lineal entre el recurso y la eficiencia de extracción está defini
 """
 
 # ╔═╡ 8821f4fe-41b4-4d87-a139-ac3ff8582b25
-begin
-	## Creamos una interpolación lineal para obtener el valor de eficiencia para cualquier valor del recurso
-	interp_efficiency = LinearInterpolation(resource_data,efficiency_data)
-end
+
 
 # ╔═╡ d69ca3bb-3f3e-43dc-8870-d0e39f93ed7c
 md"""
@@ -250,86 +240,16 @@ md"""
 """
 
 # ╔═╡ 8f0520e7-4d68-4cc4-adb7-359ed7feae50
-begin
-	## Las ecuaciones del modelo se definen en una función de Julia
-	function NonRenewableModel(dS, u,  p, t)
-	    # Parámetros del modelo.
-	    desired_growth, depreciation, cost_per_investment, fraction_reinvested, reveneu_per_unit = p
-	
-	    # Estado actual del sistema.
-	    Capital, Resource = u
 
-		# Calculamos las variables intermedias del modelo
-		extr_efficiency = interp_efficiency(Resource)
-		extraction = extr_efficiency*Capital
-
-		total_reveneu = reveneu_per_unit*extraction
-		capital_costs = Capital*0.10
-		profit = total_reveneu - capital_costs
-		capital_funds = fraction_reinvested*profit
-
-		maximum_investment = capital_funds/cost_per_investment
-
-		desired_investment = Capital*desired_growth
-
-		investment = min(maximum_investment, desired_investment)
-
-		depreciation = Capital*depreciation
-		
-		# Evaluamos la ecuación diferencial
-	    dS[1] = investment - depreciation
-		dS[2] = -extraction
-
-	return nothing
-
-	end
-end
 
 # ╔═╡ cc3e65f6-41ce-4e81-9e8a-74afd65e127b
-begin
-	# Condiciones iniciales
-	
-	## Valor inicial del stock de capital
-	K0 = 5.0
 
-	## Valor inicial del stock del recurso no renovable
-	R0 = 1000.0
-	
-	## Incorporamos el valor inicial del stock a un vector 
-	u0 = [K0, R0]
-
-	## Valor de los parámetros del modelo
-	desired_growth = 0.07
-	depreciation = 0.05
-	cost_per_investment = 2.00 
-	fraction_reinvested = 0.12
-	reveneu_per_unit = 3.0
-	
-	## Guardamos los parámetros en un vector de parámetros
-	parametros = [desired_growth, depreciation, cost_per_investment, fraction_reinvested, reveneu_per_unit]
-	
-	## Definimos el periodo de tiempo de la simulación
-	init_t = 0.0
-	final_t = 200.0
-	tiempo = (init_t,final_t)
-
-	## Definimos tamaño de paso
-	h = 0.25
-	
-	## Resolvemos el modelo con Runge-Kutta 4
-	prob1 = ODEProblem(NonRenewableModel,u0,tiempo, parametros)
-	sol = solve(prob1,RK4(),dt=h,adaptive=false)
-end
 
 # ╔═╡ fc32bd14-4a75-4862-9c49-384be1435003
-begin
-	plot(sol, title = "Comportamiento del Capital",xlabel = "Tiempo",ylabel = "Capital", label = "Capital", idxs = 1)
-end
+
 
 # ╔═╡ 8c7bd84f-345b-4d24-ac4f-6c9b16d7bbc9
-begin
-	plot(sol, title = "Comportamiento del Recurso No Renovable",xlabel = "Tiempo",ylabel = "Capital", label = "Capital", idxs = 2)
-end
+
 
 # ╔═╡ 32d20e7e-c690-449a-8c9b-6e86a05b10f9
 md"""
@@ -337,88 +257,16 @@ md"""
 """
 
 # ╔═╡ b2e271e6-0c44-4b5b-bac7-ab97fb14c836
-begin 
 
-	interp_efficiency_mtk(x) = interp_efficiency(x)
-	@register_symbolic interp_efficiency_mtk(x)
-	
-	@mtkmodel FOL begin
-    @parameters begin
-        # Parámetros del modelo y sus valores iniciales
-		desired_growth = 0.07
-		depreciation = 0.05
-		cost_per_investment = 2.00 
-		fraction_reinvested = 0.12
-		reveneu_per_unit = 3.0
-    end
-
-    @variables begin
-		# Variables de estado y sus valor inicial
-		Capital(t) = 5.0
-		Resource(t) = 1000.0
-
-		# Variables intermedias que queremos guardar sus salidas
-		extr_efficiency(t)	
-		extraction(t)
-		total_reveneu(t)
-		capital_costs(t)
-		profit(t)
-		capital_funds(t)
-
-		maximum_investment(t)
-
-		desired_investment(t)
-
-		investment(t)
-
-		depreciation_amount(t)
-		
-		capital_net_flow(t)
-		
-    end
-    @equations begin
-		extr_efficiency ~ interp_efficiency_mtk(Resource)
-		extraction ~ extr_efficiency*Capital
-
-		total_reveneu ~ reveneu_per_unit*extraction
-		capital_costs ~ Capital*0.10
-		profit ~ total_reveneu - capital_costs
-		capital_funds ~ fraction_reinvested*profit
-
-		maximum_investment ~ capital_funds/cost_per_investment
-
-		desired_investment ~ Capital*desired_growth
-
-		investment ~ min(maximum_investment, desired_investment)
-
-		depreciation_amount ~ Capital*depreciation
-		
-		capital_net_flow ~ investment - depreciation_amount
-		
-		D(Capital) ~ capital_net_flow
-		D(Resource) ~ -extraction
-    end
-	end
-
-	@mtkbuild fol = FOL()
-	
-end
 
 # ╔═╡ 6fa0ff49-ac48-4bad-a073-efc285a51be0
-begin
-	prob_mtk = ODEProblem(fol, [], tiempo, [])
-	sol_mtk = solve(prob_mtk,RK4(),dt=h,adaptive=false)
-end
+
 
 # ╔═╡ 1ccc455c-5962-40a7-95e2-dfaacef6ae72
-begin
-	plot(sol_mtk, title = "Comportamiento del Capital",xlabel = "Tiempo",ylabel = "Capital", label = "Capital", idxs = 1)
-end
+
 
 # ╔═╡ ccf2b3d2-bd22-4adc-b082-bba149729d33
-begin
-	plot(sol_mtk, title = "Comportamiento del Recurso No Renovable",xlabel = "Tiempo",ylabel = "Capital", label = "Recurso no renovable", idxs = 2)
-end
+
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """

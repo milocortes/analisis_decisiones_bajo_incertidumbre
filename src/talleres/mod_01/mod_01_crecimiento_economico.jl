@@ -87,57 +87,10 @@ Ejecutemos el modelo para el periodo de tiempo (0,100) con pasos de 0.25.
 """
 
 # ╔═╡ 925a2e83-3876-4dc2-9f3d-30c95c094bbe
-begin
-	## Las ecuaciones del modelo se definen en una función de Julia
-	function CrecimientoEconomico(dM, u,  p, t)
-	    # Parámetros del modelo.
-	    reinvestment_frac, dep_frac, labour  = p
-	
-	    # Estado actual del sistema.
-	    M = u[1]
 
-		# Calculamos las variables intermedias del modelo
-		economic_output = labour*sqrt(M)
-		investment = economic_output*reinvestment_frac
-		discards = M*dep_frac
-		
-		# Evaluamos la ecuación diferencial
-	    dM[1] = investment - discards
-
-	return nothing
-
-	end
-end
 
 # ╔═╡ 54af977a-ed44-4a52-bd4c-e3ba516a5d2e
-begin
-	# Condiciones iniciales
-	
-	## Valor inicial del stock
-	M0 = 100.0
-	## Incorporamos el valor inicial del stock a un vector 
-	u0 = [M0]
 
-	## Valor de los parámetros del modelo
-	reinvestment_frac = 0.2 
-	dep_frac = 0.1
-	labour = 100.0
-	
-	## Guardamos los parámetros en un vector de parámetros
-	parametros = [reinvestment_frac, dep_frac, labour]
-	
-	## Definimos el periodo de tiempo de la simulación
-	init_t = 0.0
-	final_t = 100.0
-	tiempo = (init_t,final_t)
-
-	## Definimos tamaño de paso
-	h = 0.25
-	
-	## Resolvemos el modelo con Runge-Kutta 4
-	prob_crec_ec = ODEProblem(CrecimientoEconomico, u0, tiempo, parametros)
-	sol_crec_ec = solve(prob_crec_ec,RK4(),dt=h,adaptive=false)
-end
 
 # ╔═╡ bd99e0ae-1624-47cf-bf48-a0aa84c244fa
 md"""
@@ -145,9 +98,7 @@ El valor en el tiempo de la variables de estado se muestra en la siguiente figur
 """
 
 # ╔═╡ 11db9d40-b176-4da6-ae50-2e99064b8da8
-begin
-	plot(sol_crec_ec, title = "Stock de Maquinaria",xlabel = "Tiempo",ylabel = "Stock", label = "Stock")
-end
+
 
 # ╔═╡ ec06a71a-87a4-4a9b-b59a-085e08cdcb1a
 question_box(md"""¿Qué ocurriría si la fracción de depreciación (```dep_frac```) es igual a cero?
@@ -189,53 +140,19 @@ md"""
 """
 
 # ╔═╡ dbad2fee-b7ad-43aa-8647-057d1c46815b
-begin
-	@mtkmodel FOL begin
-    @parameters begin
-        # Parámetros del modelo y sus valores iniciales
-		reinvestment_frac = 0.2 
-		dep_frac = 0.1
-		labour = 100.0
-		
-    end
-    @variables begin
-		# Variables de estado y sus valor inicial
-        M(t) = 100.0 
 
-		# Variables intermedias que queremos guardar sus salidas
-        economic_output(t)
-		investment(t)
-		discards(t)
-		
-    end
-    @equations begin
-		economic_output ~ labour*sqrt(M)
-		investment ~ economic_output*reinvestment_frac
-		discards ~ M*dep_frac
-
-		D(M) ~ investment - discards
-    end
-	end
-
-	@mtkbuild fol = FOL()
-end
 
 # ╔═╡ aee0bd17-1dbc-404c-aa15-caf263709bc1
-begin
-	prob_mtk = ODEProblem(fol, [], tiempo, [])
-	sol_mtk = solve(prob_mtk,RK4(),dt=h,adaptive=false)
-end
+
 
 # ╔═╡ c4936f68-20aa-4d5f-bc19-b9ace50c3f19
-begin
-	plot(sol_mtk, title = "Modelo de crecimiento económico (ModellingToolkit)",xlabel = "Tiempo",ylabel = "Stock", label = "Máquinas")
-end
+
 
 # ╔═╡ e07dd353-ab83-44c4-b203-2827ffef2670
-plot(sol_mtk, idxs = [fol.investment], title = "Investment", xlabel = "Tiempo")
+
 
 # ╔═╡ a869b9ed-ad7c-43fa-ac76-fa1e4ea89f74
-plot(sol_mtk, idxs = [fol.discards], title = "Discards", xlabel = "Tiempo")
+
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
