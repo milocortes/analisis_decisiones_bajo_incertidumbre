@@ -3,7 +3,7 @@ authors = ["Hermilo Cortés"]
 language = "en"
 multilingual = false
 src = "src"
-title = "InvESt-Tec Monterrey"
+title = "Análisis de decisiones bajo condiciones de incertidumbre"
 
 [output.html]
 default-theme = "light"
