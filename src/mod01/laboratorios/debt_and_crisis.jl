@@ -27,7 +27,8 @@ end
 
 # ╔═╡ f04bcbe8-a63f-4593-8ced-5510155fb012
 md"""
-# Debt Crisis in a Developing Country (Pruyt, 2013, Cap 14.3)
+# Debt Crisis in a Developing Country[^1]
+[^1]: Pruyt, E. (2013). Small system dynamics models for big issues: Triple jump towards real-world complexity. Delft: TU Delft Library. Chapter 14.3
 
 Wee need to build a simplistic economic model of a developing country consisting of just two endogenous stock variables (**production plants** and **debt**) in order to test under which conditions developing countries could/cannot avoid the debt trap.
 
@@ -253,7 +254,7 @@ StatsPlots = "~0.15.7"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.11.3"
+julia_version = "1.11.1"
 manifest_format = "2.0"
 project_hash = "747f70c67ea244672816e2edc3f37000a4a40fb2"
 

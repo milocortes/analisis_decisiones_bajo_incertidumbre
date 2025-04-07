@@ -4,7 +4,7 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ de54a32e-1256-11f0-2754-d1e3dc224e74
+# ╔═╡ d2e0c55a-133b-11f0-2bf6-cd7e11a4a695
 begin
 	# Load packages
 	using DifferentialEquations
@@ -18,189 +18,49 @@ begin
 	using Interpolations
 end
 
-# ╔═╡ c7dfcb6d-bfae-4088-9191-1c8c1af48815
+# ╔═╡ cc89dedd-4ab7-47cd-8e03-df4371afb64a
 begin	
 	nb_link_prefix = string(PlutoRunner.notebook_id[]) # for making urls to notebook
     pkg_cell_link = "#" * (string(PlutoRunner.currently_running_cell_id[])) # for making urls to this cell
 	TableOfContents()   # from PlutoUI
 end 
 
-# ╔═╡ 1845b4da-699e-4ece-ab5c-95816ffe2bd7
+# ╔═╡ 2292c298-307d-48c6-bdd7-70dd9a21b5c2
 md"""
-# Economic Overshoot and Collapse[^1]
-[^1]: Pruyt, E. (2013). Small system dynamics models for big issues: Triple jump towards real-world complexity. Delft: TU Delft Library. Chapter 6.3
+# Environmental Management in Miniworld[^1]
+[^1]: Pruyt, E. (2013). Small system dynamics models for big issues: Triple jump towards real-world complexity. Delft: TU Delft Library. Chapter 14.4
 
+This exercise allows one (i) to build a very simplistic world model that exhibits similar behavior as more complex global models, and (ii) to compare similar models about the same issue.
 
-Overshoot and collapse is a phenomenon found in many application domains. In this exercise,one needs to build and analyze a simple overshoot and collapse model related to renewable resource exploitation by an autarchic population, for example the population on an isolated island in ancient times.
+The values in this model are relative values, e.g. all state variables are standardized to 100% or 1. Hence, the **population** at the start of the simulation is therefore equal to 100% or 1. It only increases through **births** and only decreases through **deaths**. The variable **births** could be modeled as the product of the **normal birth rate** of 3%, the **population**, the **environmental quality** and the **consumption level**. Assume furthermore that the variable **deaths** is proportional to the **population**, the **normal death rate** of 1.5%, and to the **environmental pollution**.
 
-Suppose that the **population** initially amounts to 1 million persons and that the initial **renewable resources** amounts to 5 million units of the resource (for example tons of ﬁsh or acres of arable land). Suppose that the **births** ﬂow is proportional to the **population**, the **per capita renewable resource availability** and the **normal birth rate** of 0.35% person per person per year. Suppose that the **deaths** ﬂow is proportional to the **consumer population** and inversely proportional to the **resource availability dependent lifetime**. The latter is equal to the **normal lifetime** times the **per capita renewable resource availability**. Add ```MAX(15,MIN(100, in front of and ))``` behind this equation to ensure the maximum average adapted lifetime is 100 years and the minimum average adapted lifetime is 15 years.
+Assume that production capacity is always fully used. That is, the **consumption level** equals the **production capacity**. And the production capacity is the accumulation of all **net capacity increases**, starting from an **initial capacity** of 100%. Suppose that **net capacity increases** can be approximated by the product of the **normal growth rate**, the **consumption level**, the **environmental quality**, the **population**, and **(consumption goal - consumption level * population * environmental quality) / consumption goal**, with a **consumption goal** equal to 400% or 4 times the initial consumption, and a **normal growth rate** of 4%.
 
-**Per capita renewable resource availability** is of course equal to the stock of **renewable resources** divided by the size of the **population**. **Renewable resources** only increase through **regeneration** and decrease through **resource use**. **Regeneration** consists of the sum of the **minimum regeneration** and the **resource dependent regeneration**. The **minimum regeneration** amounts to the **carrying capacity** times the **minimum regeneration rate**. Approximate the **resource dependent regeneration** with the following function: **regeneration rate ∗ renewable resources ∗ (renewable resources/carrying capacity) ∗ (1 − renewable resources/carrying capacity)**.
+Suppose that the **environmental quality** is equal to the fraction $\dfrac{\text{damage threshold}}{\text{envorimental pollution}}$. Make sure the latter fraction cannot exceed 1. Assume that the **damage threshold** is 200%. **Environmental pollution** only increases over time through **degradation** and only decreases over time through **regeneration**, starting from an **initial pollution** level of 100%. Suppose that **regeneration** is proportional to the level of **environmental pollution** and a **normal regeneration rate** of 2%. Suppose also that **degradation** can be modeled as the product of the **population**, the **consumption level**, and the **normal degradation rate** of 2%.
 
-In times of abundance, the **resource use** is equal to the **population** times the **renewable resource consumption per capita**, but in times of scarcity it is limited to the amount of **renewable resources** divided by the **rapid resource depletion time**.
-
-The **resource use** equation could thus be written as:
-
-```math
-\text{MIN}(\dfrac{\text{renewable resources}}{\text{rapid resource depletion time}}, \text{renewable resource consumption per capita ∗ population})
-```
-
-Assume the **regeneration rate** amounts to 120%, the **carrying capacity** to 7500000 units of the resource, the **minimum regeneration rate** to 1% per year, the **rapid resource depletion time** to 1 year, and the **renewable resource consumption per capita** to 1 unit of resource per person per year.
 """
 
-# ╔═╡ 023642d8-93a0-47b4-8775-1e44308b46cd
+# ╔═╡ 6ed0395e-e723-4b12-b922-7a523ff3fd39
 question_box(md"""
 
 1. Make a Stock Flow Diagram model of this description.
-2. Simulate the model. 
-   * 2.1 What dynamics in terms of the population and the renewable resources do you expect?
-   * 2.2 What dynamics in terms of population and renewable resources do you get?
-3. What happens if the **minimum regeneration rate** is 10% per year? Plot the Population, Renewabable Resource and Resource Use 
+2. What behavior do you expect?
+3. Simulate the model over a period of 500 years. What behavior do you obtain? Use the next values for initial conditions:
+   - EnviromentalPollution = 1.0
+   - Population = 1.0
+   - ProductionCapacity = 1.0
+   - Degradation rate = 0.02
+   - Damage threshold = 1.0
+   - Regeneration rate = 0.1
+   - Birth rate = 0.03
+   - Death rate = 0.01
+   - Consumption goal = 5.0
+   - Growth rate = 0.03
+   - h = 1.0
+   - Initial simulation time = 0.0
+   - End simulation time = 500.0
+4. Play with the model: test the inﬂuence of parameters on some key performance indicators. Is the model behavior mode sensitive to parameter changes?
 """)
-
-# ╔═╡ 6a7e3a58-c3d1-4d09-9cab-a14a177c42fd
-md"""
-## Make a Stock Flow Diagram model of this description
-"""
-
-# ╔═╡ 7e01b34a-bd03-4f6c-85ba-b295a5eca84d
-answer_box(
-md"""
-$(PlutoUI.LocalResource("images/overshoot_and_collapse.png", :width => 1400))
-"""
-)
-
-# ╔═╡ 05617521-873a-4d24-9718-3abb09e5a6a6
-md"""
-## Simulate the model.
-"""
-
-# ╔═╡ 642999d1-0b9f-4362-bfcf-eddd4f4fd4ea
-begin 
-	## Definimos en modelo con ModelingToolkit
-	@mtkmodel EconomicOvershootCollapse begin
-    @parameters begin
-        # Parámetros del modelo y sus valores iniciales
-		normal_birth_rate = 0.35/100
-        regeneration_rate = 1.2
-        carrying_capacity = 7.5e6
-        minimum_regeneration_rate = 1/100
-        rapid_resource_depletion_time = 1
-        renewable_resource_consumption_per_capita = 1
-        normal_lifetime = 30
-        percent_consumers = 0.90
-    end
-
-    @variables begin
-		# Variables de estado y sus valor inicial
-		Population(t) = 1e6
-		RenewableResources(t) = 5e6
-
-		# Variables intermedias
-		consumer_population(t)	
-		per_capita_renewable_resource_availability(t)
-		resource_availability_dependent_lifetime(t)
-		minimum_regeneration(t)
-		resource_dependent_regeneration(t)
-
-		# Variables de flujo
-		births_flow(t)
-		deaths_flow(t)
-		regeneration(t)
-		resource_use(t)
-		
-    end
-    @equations begin
-		# Ecuaciones de las Variables intermedias
-		consumer_population ~ Population*percent_consumers
-		
-		per_capita_renewable_resource_availability ~ RenewableResources/Population
-		
-		resource_availability_dependent_lifetime ~ max(15, min(100, normal_lifetime*per_capita_renewable_resource_availability))
-
-		minimum_regeneration ~ carrying_capacity*minimum_regeneration_rate
-
-		resource_dependent_regeneration ~ regeneration_rate*RenewableResources*(RenewableResources/carrying_capacity)*(1-RenewableResources/carrying_capacity)
-
-		# Ecuaciones de las Variables de Flujo
-		births_flow ~ Population*per_capita_renewable_resource_availability*normal_birth_rate
-		
-		deaths_flow ~ consumer_population/resource_availability_dependent_lifetime
-
-		regeneration ~ minimum_regeneration + resource_dependent_regeneration
-
-		resource_use ~ min(Population*renewable_resource_consumption_per_capita, RenewableResources/rapid_resource_depletion_time)
-
-		# Ecuaciones de las tasas de cambio de los stocks
-		D(Population) ~ births_flow - deaths_flow
-		D(RenewableResources) ~ regeneration - resource_use 
-    end
-	end
-	
-end
-
-# ╔═╡ d0f5bfb5-043d-43ae-a345-241de46bc9b6
-begin
-	## Construimos una instancia del modelo
-	@mtkbuild mtk_model = EconomicOvershootCollapse()
-
-	## Definimos una instancia del problema de ecuaciones diferenciales
-	time = (0.0, 100.0)
-	h = 0.1
-	prob_ode = ODEProblem(mtk_model, [], time, [])
-
-	## Solve the model
-	sol_ode = solve(prob_ode,RK4(),dt=h,adaptive=false)
-end
-
-# ╔═╡ dcc8c962-707e-4c83-81b7-4c9a400f282c
-begin
-	plot(sol_ode, title = "Population dynamics", idxs = 1, xlabel = "Time")
-end
-
-# ╔═╡ e07604fa-9e21-4069-8bc4-f7732c7b5740
-begin
-	plot(sol_ode, title = "Renewable Resources dynamics", idxs = 2, xlabel = "Time")
-end
-
-# ╔═╡ 957f459a-3194-436e-87c5-08690843772c
-begin
-	plot(sol_ode, title = "Resource Use dynamics", idxs = mtk_model.resource_use, xlabel = "Time")
-end
-
-# ╔═╡ 3f00b144-10c8-4797-9b4b-1ea8632af450
-md"""
-##  What happens if the minimum regeneration rate is 10% per year? Plot the Population, Renewabable Resource and Resource Use 
-"""
-
-# ╔═╡ 2bef9001-b347-4196-acfd-d0b0d671fba9
-begin
-	## Construimos una nueva instancia del modelo
-	@mtkbuild mtk_model_reg_rate = EconomicOvershootCollapse(;regeneration_rate = 0.1)
-
-	## Definimos una instancia del problema de ecuaciones diferenciales
-	prob_ode_reg_rate = ODEProblem(mtk_model_reg_rate, [], time, [])
-	## Solve the model
-	sol_ode_reg_rate = solve(prob_ode_reg_rate,RK4(),dt=h,adaptive=false)
-end
-
-# ╔═╡ e97def40-0f3c-481d-bee2-2d78875a93c5
-begin
-	plot(sol_ode, title = "Population dynamics", idxs = 1, xlabel = "Time", label = "Regeneration Rate = 120%")
-	plot!(sol_ode_reg_rate, idxs = 1, label = "Regeneration Rate = 10%")
-end
-
-# ╔═╡ 549f760c-7c7e-45de-8be9-4a2c63ff5b10
-begin
-	plot(sol_ode, title = "Renewable Resources dynamics", idxs = 2, xlabel = "Time", label = "Regeneration Rate = 120%")
-	plot!(sol_ode_reg_rate, idxs = 2, label = "Regeneration Rate = 10%")
-end
-
-# ╔═╡ 2c131e2a-c9a3-40fa-8881-76ca016a1759
-begin
-	plot(sol_ode, title = "Resources Use dynamics", idxs = mtk_model.resource_use, xlabel = "Time", label = "Regeneration Rate = 120%")
-	plot!(sol_ode_reg_rate, idxs = mtk_model_reg_rate.resource_use, label = "Regeneration Rate = 10%")
-end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -3396,22 +3256,9 @@ version = "1.4.1+2"
 """
 
 # ╔═╡ Cell order:
-# ╠═de54a32e-1256-11f0-2754-d1e3dc224e74
-# ╟─c7dfcb6d-bfae-4088-9191-1c8c1af48815
-# ╟─1845b4da-699e-4ece-ab5c-95816ffe2bd7
-# ╟─023642d8-93a0-47b4-8775-1e44308b46cd
-# ╟─6a7e3a58-c3d1-4d09-9cab-a14a177c42fd
-# ╟─7e01b34a-bd03-4f6c-85ba-b295a5eca84d
-# ╟─05617521-873a-4d24-9718-3abb09e5a6a6
-# ╠═642999d1-0b9f-4362-bfcf-eddd4f4fd4ea
-# ╠═d0f5bfb5-043d-43ae-a345-241de46bc9b6
-# ╠═dcc8c962-707e-4c83-81b7-4c9a400f282c
-# ╠═e07604fa-9e21-4069-8bc4-f7732c7b5740
-# ╠═957f459a-3194-436e-87c5-08690843772c
-# ╟─3f00b144-10c8-4797-9b4b-1ea8632af450
-# ╠═2bef9001-b347-4196-acfd-d0b0d671fba9
-# ╠═e97def40-0f3c-481d-bee2-2d78875a93c5
-# ╠═549f760c-7c7e-45de-8be9-4a2c63ff5b10
-# ╠═2c131e2a-c9a3-40fa-8881-76ca016a1759
+# ╠═d2e0c55a-133b-11f0-2bf6-cd7e11a4a695
+# ╟─cc89dedd-4ab7-47cd-8e03-df4371afb64a
+# ╟─2292c298-307d-48c6-bdd7-70dd9a21b5c2
+# ╟─6ed0395e-e723-4b12-b922-7a523ff3fd39
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

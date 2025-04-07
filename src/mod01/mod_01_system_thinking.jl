@@ -24,7 +24,7 @@ end
 
 # ╔═╡ bf574c88-e724-11ef-08c4-e101397b7939
 md"""
-# System Thinging: System Dynamics
+# System Thinking: System Dynamics
 """
 
 # ╔═╡ c84b0e90-6fc0-4d50-8b15-3a3507c051c1
@@ -197,7 +197,7 @@ StatsPlots = "~0.15.7"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.11.3"
+julia_version = "1.11.1"
 manifest_format = "2.0"
 project_hash = "69099c49234933fbb77e4ca577b42b7e03c04ebc"
 
