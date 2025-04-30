@@ -16,6 +16,7 @@ Material del bloque "Análisis de decisiones bajo condiciones de incertidumbre" 
     - [SIR Model](./laboratorios/sir.html)
     - [Economic Overshoot and Collapse](./laboratorios/overshoot_and_collapse.html)
     - [Debt Crisis in a Developing Country](./laboratorios/debt_and_crisis.html)
+    - [Goodwin Model](./laboratorios/goodwin_model.html)
 
 * Tareas
     - [Environmental Management in Miniworld](./laboratorios/environmental_management.html)
