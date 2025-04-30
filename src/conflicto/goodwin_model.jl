@@ -71,26 +71,33 @@ begin
 	    1,
 	    xlim = (0.0, 7.0),
 	    ylim = (0.0, 7.0),
-	    title = "Lorenz Attractor",
+	    title = "Diagrama de Fase",
 	    legend = false,
 	    marker = 2,
+		ylabel = "Prey",
+		xlabel = "Predator"
 	)
 	
 	anim = @animate for (prey,predator) in solution.u
 	    push!(plt, prey, predator)
-	end every 5
+	end every 1
 	
 	gif(anim)
 end
 
+# ╔═╡ 1994afe3-6a75-48ec-b2f7-a6f59fd0b970
+md"""
+#  El modelo de Goodwin
+
+"""
+
+# ╔═╡ 9628fe30-8e4f-4265-9ade-d15258a1c500
+md"""
+$(PlutoUI.LocalResource("images/articulokeen.png", :width => 700))
+"""
+
 # ╔═╡ 8da8ef36-a44f-49bb-b29d-179da26a35ed
 md"""
-# El modelo de Goodwin
-
-
-$(PlutoUI.LocalResource("images/articulo_keen.png", :width => 700))
-
-
 El ciclo causal de modelo es el siguiente:
 
 * El nivel de stock de capital $K$ determina en nivel de producto $Y$ via el acelerador$\nu$:
@@ -3318,7 +3325,9 @@ version = "1.4.1+2"
 # ╟─a552b1cc-251d-11f0-2c97-f376d1778e10
 # ╠═e228fbf9-3ebc-4e26-b572-6292539de24a
 # ╠═eb2f0365-6c20-4644-a167-3abf7f40272e
-# ╠═c03097e5-1e1d-4f92-b88a-28c9b6cdbc04
+# ╟─c03097e5-1e1d-4f92-b88a-28c9b6cdbc04
+# ╟─1994afe3-6a75-48ec-b2f7-a6f59fd0b970
+# ╟─9628fe30-8e4f-4265-9ade-d15258a1c500
 # ╟─8da8ef36-a44f-49bb-b29d-179da26a35ed
 # ╠═d53845ad-331a-425e-b545-e3b06fa53269
 # ╠═dc627f10-c3c6-4a95-ab5d-1d00a19c91d8
