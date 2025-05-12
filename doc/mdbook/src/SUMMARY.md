@@ -19,4 +19,4 @@
 
 # Tareas
 
-- [Environmental Management in Miniworld](./laboratorios/environmental_management.html)
+- [Environmental Management in Miniworld](./tareas/environmental_management.html)

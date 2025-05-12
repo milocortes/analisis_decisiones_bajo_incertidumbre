@@ -19,4 +19,4 @@ Material del bloque "Análisis de decisiones bajo condiciones de incertidumbre" 
     - [Goodwin Model](./laboratorios/goodwin_model.html)
 
 * Tareas
-    - [Environmental Management in Miniworld](./laboratorios/environmental_management.html)
+    - [Environmental Management in Miniworld](./tareas/environmental_management.html)
