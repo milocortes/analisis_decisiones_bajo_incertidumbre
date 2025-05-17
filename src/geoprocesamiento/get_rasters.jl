@@ -5,7 +5,7 @@ using Plots
 using ArchGDAL 
 
 
-ENV["RASTERDATASOURCES_PATH"] = "/home/milo/Documents/egtp/clases/2025/ccm/ltp/analisis_decisiones_bajo_incertidumbre/data/reto/raster"
+ENV["RASTERDATASOURCES_PATH"] = "/home/milo/Documents/egtp/clases/ccm/decisiones_incertidumbre/data/reto/rasters"
 
 
 getraster(WorldClim{BioClim})
