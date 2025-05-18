@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "guachochi_box",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "municipio": "Guachochi" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ -106.7208056853828, 26.507141157895052 ], [ -106.7208056853828, 27.782327478491869 ], [ -107.934613928299711, 27.782327478491869 ], [ -107.934613928299711, 26.507141157895052 ], [ -106.7208056853828, 26.507141157895052 ] ] ] } }
+]
+}

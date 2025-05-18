@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "etchojoa_box",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "municipio": "Etchojoa" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ -109.398532653204853, 26.748009596341607 ], [ -109.398532653204853, 27.339935503880916 ], [ -110.047036990823997, 27.339935503880916 ], [ -110.047036990823997, 26.748009596341607 ], [ -109.398532653204853, 26.748009596341607 ] ] ] } }
+]
+}
