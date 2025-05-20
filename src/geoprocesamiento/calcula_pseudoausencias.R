@@ -35,13 +35,13 @@ coord_viento <- power[power$primary_fuel==energia_viento, c("longitude", "latitu
 # Srad
 
 covariables <- raster::stack( 
-    file.path(BIOCLIM_PATH, "wc2.1_10m_bio_1.tif"),
-    file.path(BIOCLIM_PATH, "wc2.1_10m_bio_3.tif"),
-    file.path(BIOCLIM_PATH, "wc2.1_10m_bio_4.tif"),
-    file.path(BIOCLIM_PATH, "wc2.1_10m_bio_5.tif"),
-    file.path(BIOCLIM_PATH, "wc2.1_10m_bio_12.tif"),
-    file.path(SRAD_CLIM_PATH, "wc2.1_10m_srad_08.tif"),
-    file.path(WIND_CLIM_PATH, "wc2.1_10m_wind_08.tif")
+    file.path(BIOCLIM_PATH, "wc2.1_2.5m_bio_1.tif"),
+    file.path(BIOCLIM_PATH, "wc2.1_2.5m_bio_3.tif"),
+    file.path(BIOCLIM_PATH, "wc2.1_2.5m_bio_4.tif"),
+    file.path(BIOCLIM_PATH, "wc2.1_2.5m_bio_5.tif"),
+    file.path(BIOCLIM_PATH, "wc2.1_2.5m_bio_12.tif"),
+    file.path(SRAD_CLIM_PATH, "wc2.1_2.5m_srad_08.tif"),
+    file.path(WIND_CLIM_PATH, "wc2.1_2.5m_wind_08.tif")
  )
 
 
