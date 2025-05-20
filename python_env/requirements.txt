@@ -16,6 +16,7 @@ click==8.2.0
 click-plugins==1.1.1
 cligj==0.7.2
 comm==0.2.2
+contextily==1.6.2
 contourpy==1.3.2
 cycler==0.12.1
 debugpy==1.8.14
@@ -26,7 +27,9 @@ fastjsonschema==2.21.1
 fiona==1.10.1
 fonttools==4.58.0
 fqdn==1.5.1
+geographiclib==2.0
 geopandas==1.0.1
+geopy==2.4.1
 h11==0.16.0
 httpcore==1.0.9
 httpx==0.28.1
@@ -52,9 +55,11 @@ jupyterlab==4.4.2
 jupyterlab_pygments==0.3.0
 jupyterlab_server==2.27.3
 kiwisolver==1.4.8
+lightgbm==4.6.0
 MarkupSafe==3.0.2
 matplotlib==3.10.3
 matplotlib-inline==0.1.7
+mercantile==1.2.1
 mistune==3.1.3
 nbclient==0.10.2
 nbconvert==7.16.6
@@ -63,6 +68,7 @@ nest-asyncio==1.6.0
 notebook==7.4.2
 notebook_shim==0.2.4
 numpy==2.2.5
+nvidia-nccl-cu12==2.26.5
 overrides==7.7.0
 packaging==25.0
 pandas==2.2.3
@@ -119,3 +125,5 @@ webcolors==24.11.1
 webencodings==0.5.1
 websocket-client==1.8.0
 xarray==2025.4.0
+xgboost==3.0.1
+xyzservices==2025.4.0
